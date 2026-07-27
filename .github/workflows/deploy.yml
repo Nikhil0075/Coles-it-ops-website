@@ -1,9 +1,12 @@
 name: Deploy site to GitHub Pages
 
 # Publishes ONLY index.html. The rest of the repo (specs, .docx deliverables,
-# mock ticket data, source diagrams) is deliberately NOT published — a Pages
-# site built from a private repo is still reachable by anyone with the URL
-# unless you are on GitHub Enterprise Cloud with an organisation account.
+# mock ticket data, source diagrams) stays in the repo but is not served.
+#
+# Prerequisite: Settings -> Pages -> Source must be set to "GitHub Actions".
+# The enablement:true below tries to do that automatically on first run, but it
+# can 403 depending on token permissions — if the build fails with
+# "Get Pages site failed ... Not Found", set it in the UI and re-run.
 
 on:
   push:
@@ -28,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Stage only the site file
         run: |
@@ -39,10 +42,14 @@ jobs:
           echo "Staged $(du -h _site/index.html | cut -f1) of site"
 
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
+        with:
+          # creates the Pages site on first run instead of failing with
+          # "Get Pages site failed ... Not Found"
+          enablement: true
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
@@ -55,4 +62,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
