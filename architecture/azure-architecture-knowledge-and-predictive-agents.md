@@ -9,6 +9,7 @@ Companion document to the two Whimsical architecture diagrams.
 | Predictive Agent — Azure Architecture | https://whimsical.com/2AKCBwFyHWwoabyS3ZM8gt |
 | RCA Agent — Azure Architecture | https://whimsical.com/2bdQLKnukbUnYewenpPpeu |
 | Conversational Agent — Azure Architecture | https://whimsical.com/ASWBxR1juQ97d5yb4ChjfU |
+| Voice Agent — Azure Architecture | https://whimsical.com/JnUN8EQGZFeSARRSh1MxpM |
 
 The diagrams are deliberately sparse — only the services that carry the design, with labeled directional flows and the trust boundaries that matter. Numbered arrows correspond to the numbered flow steps below; this document carries the full detail that is intentionally kept off the canvas.
 
@@ -190,6 +191,43 @@ The self-service front door. Its architectural job is **containment**: resolve w
 *No escalation path.* Every branch in the original terminates at END. A conversational agent facing colleagues needs a warm-transfer route that carries the conversation context with it, otherwise the user re-explains everything to a human and the agent has produced negative value. The groundedness gate and the fallback node both feed it.
 
 The metric that matters for this agent is **containment rate against handover rate** — resolved without a human, versus escalated. Tracked in Foundry evaluations alongside the usual groundedness checks.
+
+---
+
+## 6c. Voice Agent — architecture and the speech-pipeline decision
+
+The Voice Agent puts the same reasoning stack behind a phone line. Everything that makes the other agents safe still applies, but voice adds two constraints: latency budget is unforgiving, and **speech is a continuous stream with no natural place to inspect text** unless you design one in.
+
+### The decision that shapes everything: Voice Live vs. discrete pipeline
+
+The supplied graph specifies ACS "Call Automation + **Voice Live API**" *and* separate Speech-to-Text and Neural TTS nodes with media flowing ACS ↔ STT → Gateway → TTS → ACS. Those are two alternative architectures, not two layers of one.
+
+| | Voice Live API | Discrete STT → reason → TTS |
+|---|---|---|
+| Shape | One unified speech-to-speech interface: STT, model and TTS behind a single API | Separate services stitched together by your orchestrator |
+| Turn-taking | Azure Semantic VAD detects speech boundaries by meaning, strips filler words — materially better barge-in and fewer false endpoints | You build turn detection yourself; this is the hard part of voice UX |
+| Latency | Lower — fewer hops, no round-trip through your own gateway between hearing and speaking | Higher — every hop is yours to optimise |
+| **Text checkpoint before the model** | **None.** Audio goes in, audio comes out | **Yes.** Transcript exists as text before any model call |
+
+**The de-identification mandate (P2) decides it.** If no raw PII may reach the model, there must be a text checkpoint where the PII Guard can pseudonymise between transcription and inference. Voice Live's integrated speech-to-speech path removes exactly that checkpoint. So the diagram is drawn as the **discrete pipeline**, and the Voice Live label is dropped from ACS.
+
+That trade is real and worth stating plainly: this design accepts worse turn-taking and higher latency in exchange for keeping the PII boundary intact. If someone later argues for Voice Live on call-quality grounds, they are implicitly arguing to relax P2 for voice — that is a governance decision, not a performance tuning one.
+
+### Flow
+
+1–6. The caller reaches Azure Communication Services over PSTN, mobile or Teams. Media streams to Azure AI Speech for real-time transcription; the Session Gateway on Container Apps holds the WebSocket session; Neural TTS renders the spoken reply. Event Grid carries call lifecycle events to the gateway.
+
+7–12. **Identity is deterministic and never an LLM decision** — Entra ID verifies the caller, Conditional Access and MFA gate sensitive actions. The PII Guard combines Azure AI Language detection with a deterministic regex layer; pseudonyms are session-scoped and the map lives in a CMK-encrypted Cosmos DB token vault.
+
+13–19. The Agent Orchestrator (LangGraph on Foundry Agent Service) runs intent → slots → policy → action → knowledge → reply, reasoning on pseudonyms only. Azure OpenAI does intent and slot extraction with Content Safety filtering injection and jailbreak attempts; the Knowledge Agent retrieves grounded SOPs from AI Search. The **Policy Engine is deterministic** — a closed action set classifying every request as auto-execute, approval-required or out-of-scope.
+
+20–25. The Tool Proxy Function is the only boundary that resolves a pseudonym back to a real identifier. Actions queue through Service Bus with retry and dead-lettering, the ITSM connector writes the ticket to Cosmos DB, and the reference returns to the caller as spoken confirmation.
+
+### Two further notes
+
+*The regex layer is doing more work than it looks.* On a voice channel the PII Guard sees ASR output, not typed text — transcription errors will defeat pure ML PII detection on exactly the high-risk tokens (card numbers, employee IDs, addresses) because those are read aloud digit by digit. Keeping the deterministic regex layer alongside AI Language is the right call; consider also constraining the ASR with phrase lists for known identifier formats.
+
+*Confirmation before action is not optional on voice.* There is no screen to review a draft. Any `auto_execute` action should be read back and verbally confirmed before the tool proxy fires, and that confirmation belongs in the run record alongside the correlation ID.
 
 ---
 
