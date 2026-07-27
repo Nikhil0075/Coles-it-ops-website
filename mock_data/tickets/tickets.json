@@ -1,0 +1,556 @@
+{
+  "$schema_note": "Mock ITSM ticket dataset for Coles Agentic AI Voice Agent showcase. Generic ITSM JSON schema (tool-agnostic). Aligned to Voice_Assist.pdf core functions: password reset, access request initiation, incident creation, status checks — plus escalation and Knowledge Agent grounding paths.",
+  "generated_for": "Coles IT Operations — Agentic AI Enablement Demo",
+  "generated_date": "2026-07-15",
+  "tickets": [
+    {
+      "ticket_id": "REQ-2026-10231",
+      "type": "service_request",
+      "subtype": "password_reset",
+      "title": "POS terminal login lockout — store 0142 checkout 6",
+      "description": "Caller is a store team member locked out of the POS terminal login after 3 failed PIN attempts at checkout 6. Requested a password/PIN reset via the Voice Agent.",
+      "status": "resolved",
+      "priority": "P3",
+      "impact": "medium",
+      "urgency": "high",
+      "category": "Identity & Access",
+      "subcategory": "Password Reset",
+      "affected_ci": "POS-TERM-0142-06",
+      "affected_service": "Store POS Platform",
+      "store_location": "Store 0142 — Blacktown",
+      "requested_by": {
+        "pseudonym_token": "PERSON_1",
+        "role": "Store Team Member",
+        "employee_id_token": "EMP_TOKEN_7741",
+        "verification_method": "Entra ID deterministic verification (employee ID + DOB challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-88f21c3e-0142",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-001",
+        "call_duration_seconds": 94,
+        "intent_resolved": "password_reset",
+        "intent_confidence": 0.93,
+        "slots_captured": {
+          "target_system": "POS Terminal",
+          "store_id": "0142",
+          "terminal_id": "checkout-6"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_1", "EMP_TOKEN_7741"],
+        "action_execution_mode": "auto-execute",
+        "action_api_call": "reset_password(target=POS-TERM-0142-06, user=PERSON_1)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": false,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "Your POS terminal login for checkout 6 has been reset. A temporary PIN has been sent to your registered store manager device. Your reference number is REQ-2026-10231."
+      },
+      "resolution": {
+        "resolution_notes": "Password/PIN reset executed automatically via Entra ID / MIM automatable API. In-scope, low-risk, narrow request type approved for voice-channel auto-execution per identity-verification policy.",
+        "resolved_by": "Voice Agent (auto-execute, deterministic action)",
+        "resolution_code": "Auto-Resolved - Self Service Voice",
+        "closure_notes_drafted_by_agent": true
+      },
+      "created_at": "2026-07-08T06:12:03+10:00",
+      "updated_at": "2026-07-08T06:13:37+10:00",
+      "resolved_at": "2026-07-08T06:13:37+10:00",
+      "sla": {
+        "response_target_minutes": 5,
+        "resolution_target_minutes": 15,
+        "response_actual_minutes": 1,
+        "resolution_actual_minutes": 1,
+        "sla_breached": false
+      },
+      "assignment_group": "Service Desk L1",
+      "tags": ["voice-agent", "password-reset", "auto-execute", "pos", "deterministic-flow"]
+    },
+    {
+      "ticket_id": "REQ-2026-10245",
+      "type": "service_request",
+      "subtype": "password_reset",
+      "title": "Corporate network account locked out — password reset requested",
+      "description": "Caller reported being locked out of their corporate Windows/Entra account after returning from leave. Requested password reset via phone.",
+      "status": "resolved",
+      "priority": "P3",
+      "impact": "low",
+      "urgency": "medium",
+      "category": "Identity & Access",
+      "subcategory": "Password Reset",
+      "affected_ci": "ENTRA-CORP-ACCOUNTS",
+      "affected_service": "Corporate Identity Platform",
+      "store_location": "Support Office — Hawthorn East",
+      "requested_by": {
+        "pseudonym_token": "PERSON_2",
+        "role": "Category Analyst",
+        "employee_id_token": "EMP_TOKEN_5502",
+        "verification_method": "Entra ID deterministic verification (employee ID + manager name challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-4b7f19aa-0009",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-002",
+        "call_duration_seconds": 121,
+        "intent_resolved": "password_reset",
+        "intent_confidence": 0.97,
+        "slots_captured": {
+          "target_system": "Corporate Entra Account",
+          "account_type": "standard_corporate_user"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_2", "EMP_TOKEN_5502"],
+        "action_execution_mode": "auto-execute",
+        "action_api_call": "reset_password(target=ENTRA-CORP-ACCOUNTS, user=PERSON_2)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": false,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "Your corporate account password has been reset. Please check your registered personal mobile for a one-time temporary password. Your reference number is REQ-2026-10245."
+      },
+      "resolution": {
+        "resolution_notes": "Standard corporate account reset, in-scope for voice-channel auto-execution. No elevated/privileged account flags present.",
+        "resolved_by": "Voice Agent (auto-execute, deterministic action)",
+        "resolution_code": "Auto-Resolved - Self Service Voice",
+        "closure_notes_drafted_by_agent": true
+      },
+      "created_at": "2026-07-10T22:41:11+10:00",
+      "updated_at": "2026-07-10T22:42:58+10:00",
+      "resolved_at": "2026-07-10T22:42:58+10:00",
+      "sla": {
+        "response_target_minutes": 5,
+        "resolution_target_minutes": 15,
+        "response_actual_minutes": 1,
+        "resolution_actual_minutes": 2,
+        "sla_breached": false
+      },
+      "assignment_group": "Service Desk L1",
+      "tags": ["voice-agent", "password-reset", "auto-execute", "corporate-identity", "deterministic-flow"]
+    },
+    {
+      "ticket_id": "REQ-2026-10298",
+      "type": "service_request",
+      "subtype": "access_request",
+      "title": "New starter access request — SAP Retail (Merchandising module)",
+      "description": "Caller (store manager) initiated an access request via voice on behalf of a new starter joining the merchandising team, requesting SAP Retail Merchandising module access.",
+      "status": "pending_approval",
+      "priority": "P4",
+      "impact": "low",
+      "urgency": "low",
+      "category": "Identity & Access",
+      "subcategory": "Access Request",
+      "affected_ci": "SAP-RETAIL-MERCH-PROD",
+      "affected_service": "SAP Retail Platform",
+      "store_location": "Support Office — Hawthorn East",
+      "requested_by": {
+        "pseudonym_token": "PERSON_3",
+        "role": "Store Manager",
+        "employee_id_token": "EMP_TOKEN_6120",
+        "verification_method": "Entra ID deterministic verification (employee ID + DOB challenge)",
+        "verification_result": "passed"
+      },
+      "request_for": {
+        "pseudonym_token": "PERSON_4",
+        "role": "Merchandising Coordinator (new starter)",
+        "employee_id_token": "EMP_TOKEN_6121",
+        "start_date": "2026-07-21"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-2e91b0dd-0341",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-003",
+        "call_duration_seconds": 168,
+        "intent_resolved": "access_request_initiation",
+        "intent_confidence": 0.89,
+        "slots_captured": {
+          "target_system": "SAP Retail",
+          "module": "Merchandising",
+          "access_level": "standard_read_write",
+          "beneficiary": "PERSON_4",
+          "business_justification": "New starter requires system access from start date to perform merchandising duties"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_3", "PERSON_4", "EMP_TOKEN_6120", "EMP_TOKEN_6121"],
+        "action_execution_mode": "approve-and-execute",
+        "action_api_call": "create_access_request(system=SAP-RETAIL-MERCH-PROD, beneficiary=PERSON_4, requestor=PERSON_3)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": true,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "I've logged an access request for SAP Retail Merchandising for your new starter, effective their start date. It's been routed to their line manager for approval. Your reference number is REQ-2026-10298."
+      },
+      "resolution": {
+        "resolution_notes": "Access requests are not in the auto-execution closed set for the voice channel — this action type requires human approval before provisioning per progressive-autonomy policy. Awaiting line manager sign-off.",
+        "resolved_by": null,
+        "resolution_code": null,
+        "closure_notes_drafted_by_agent": false
+      },
+      "approval": {
+        "approval_required_from": "Line Manager",
+        "approval_status": "pending",
+        "approval_routed_at": "2026-07-12T09:18:44+10:00"
+      },
+      "created_at": "2026-07-12T09:16:02+10:00",
+      "updated_at": "2026-07-12T09:18:44+10:00",
+      "resolved_at": null,
+      "sla": {
+        "response_target_minutes": 30,
+        "resolution_target_minutes": 2880,
+        "response_actual_minutes": 3,
+        "resolution_actual_minutes": null,
+        "sla_breached": false
+      },
+      "assignment_group": "Identity & Access Management",
+      "tags": ["voice-agent", "access-request", "approval-gated", "sap-retail", "new-starter"]
+    },
+    {
+      "ticket_id": "REQ-2026-10312",
+      "type": "service_request",
+      "subtype": "access_request",
+      "title": "Role-change access request — Workforce Management (WFM) rostering approval rights",
+      "description": "Caller requested elevated WFM access (roster approval rights) via voice following a promotion to Assistant Store Manager. Request approved and provisioned.",
+      "status": "resolved",
+      "priority": "P4",
+      "impact": "low",
+      "urgency": "low",
+      "category": "Identity & Access",
+      "subcategory": "Access Request",
+      "affected_ci": "WFM-ROSTERING-PROD",
+      "affected_service": "Workforce Management Platform",
+      "store_location": "Store 0287 — Frankston",
+      "requested_by": {
+        "pseudonym_token": "PERSON_5",
+        "role": "Assistant Store Manager (newly promoted)",
+        "employee_id_token": "EMP_TOKEN_6890",
+        "verification_method": "Entra ID deterministic verification (employee ID + manager name challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-9c4d7712-0552",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-004",
+        "call_duration_seconds": 143,
+        "intent_resolved": "access_request_initiation",
+        "intent_confidence": 0.91,
+        "slots_captured": {
+          "target_system": "Workforce Management",
+          "module": "Rostering",
+          "access_level": "approval_rights",
+          "business_justification": "Recent promotion to Assistant Store Manager requires roster approval permissions"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_5", "EMP_TOKEN_6890"],
+        "action_execution_mode": "approve-and-execute",
+        "action_api_call": "create_access_request(system=WFM-ROSTERING-PROD, beneficiary=PERSON_5, requestor=PERSON_5)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": true,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "Your request for WFM roster approval rights has been logged and sent for manager approval. Your reference number is REQ-2026-10312."
+      },
+      "resolution": {
+        "resolution_notes": "Approved by Store Operations Manager same day; access provisioned via WFM entitlement API by Identity & Access Management team.",
+        "resolved_by": "Identity & Access Management (human-executed provisioning)",
+        "resolution_code": "Approved and Provisioned",
+        "closure_notes_drafted_by_agent": true
+      },
+      "approval": {
+        "approval_required_from": "Store Operations Manager",
+        "approval_status": "approved",
+        "approval_routed_at": "2026-07-09T11:02:15+10:00",
+        "approval_decided_at": "2026-07-09T15:47:30+10:00"
+      },
+      "created_at": "2026-07-09T10:59:41+10:00",
+      "updated_at": "2026-07-09T16:10:05+10:00",
+      "resolved_at": "2026-07-09T16:10:05+10:00",
+      "sla": {
+        "response_target_minutes": 30,
+        "resolution_target_minutes": 2880,
+        "response_actual_minutes": 3,
+        "resolution_actual_minutes": 310,
+        "sla_breached": false
+      },
+      "assignment_group": "Identity & Access Management",
+      "tags": ["voice-agent", "access-request", "approval-gated", "wfm", "role-change"]
+    },
+    {
+      "ticket_id": "INC-2026-08871",
+      "type": "incident",
+      "subtype": "incident_creation",
+      "title": "EFTPOS terminal unresponsive — store 0142 checkout 6",
+      "description": "Caller (store team member) reported the EFTPOS terminal at checkout 6 is unresponsive and displaying a blank screen; customers cannot tap or insert cards. Incident created via Voice Agent.",
+      "status": "open",
+      "priority": "P2",
+      "impact": "high",
+      "urgency": "high",
+      "category": "Payments & POS",
+      "subcategory": "EFTPOS Hardware Fault",
+      "affected_ci": "EFTPOS-TERM-0142-06",
+      "affected_service": "Store Payments Platform",
+      "store_location": "Store 0142 — Blacktown",
+      "requested_by": {
+        "pseudonym_token": "PERSON_6",
+        "role": "Store Team Member",
+        "employee_id_token": "EMP_TOKEN_7741",
+        "verification_method": "Entra ID deterministic verification (employee ID + DOB challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-11a08e3f-0771",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-005",
+        "call_duration_seconds": 87,
+        "intent_resolved": "incident_creation",
+        "intent_confidence": 0.95,
+        "slots_captured": {
+          "affected_ci": "EFTPOS-TERM-0142-06",
+          "symptom": "unresponsive_blank_screen",
+          "customer_impact": "unable_to_process_card_payments",
+          "store_id": "0142",
+          "terminal_id": "checkout-6"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_6", "EMP_TOKEN_7741"],
+        "action_execution_mode": "auto-execute",
+        "action_api_call": "create_incident(ci=EFTPOS-TERM-0142-06, symptom=unresponsive_blank_screen, priority=P2)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": false,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "I've logged an incident for the unresponsive EFTPOS terminal at checkout 6. Your reference number is INC-2026-08871. A technician will be notified given the customer payment impact."
+      },
+      "resolution": {
+        "resolution_notes": null,
+        "resolved_by": null,
+        "resolution_code": null,
+        "closure_notes_drafted_by_agent": false
+      },
+      "created_at": "2026-07-14T14:03:27+10:00",
+      "updated_at": "2026-07-14T14:04:02+10:00",
+      "resolved_at": null,
+      "sla": {
+        "response_target_minutes": 15,
+        "resolution_target_minutes": 240,
+        "response_actual_minutes": 4,
+        "resolution_actual_minutes": null,
+        "sla_breached": false
+      },
+      "assignment_group": "Store Technology Support L2",
+      "tags": ["voice-agent", "incident-creation", "eftpos", "payments", "auto-logged", "known-error-candidate"]
+    },
+    {
+      "ticket_id": "INC-2026-08872",
+      "type": "incident",
+      "subtype": "incident_creation",
+      "title": "EFTPOS terminal repeated card-read failure — store 0311 checkout 3",
+      "description": "Caller (store team member) reported the EFTPOS terminal at checkout 3 is failing to read chip and tap transactions intermittently, causing customer queues. Incident created via Voice Agent; matched by Knowledge Agent to a known EFTPOS terminal fault pattern with an existing SOP.",
+      "status": "in_progress",
+      "priority": "P2",
+      "impact": "high",
+      "urgency": "high",
+      "category": "Payments & POS",
+      "subcategory": "EFTPOS Hardware Fault",
+      "affected_ci": "EFTPOS-TERM-0311-03",
+      "affected_service": "Store Payments Platform",
+      "store_location": "Store 0311 — Dandenong",
+      "requested_by": {
+        "pseudonym_token": "PERSON_7",
+        "role": "Store Team Member",
+        "employee_id_token": "EMP_TOKEN_8203",
+        "verification_method": "Entra ID deterministic verification (employee ID + DOB challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-63dd44a1-0904",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-006",
+        "call_duration_seconds": 102,
+        "intent_resolved": "incident_creation",
+        "intent_confidence": 0.94,
+        "slots_captured": {
+          "affected_ci": "EFTPOS-TERM-0311-03",
+          "symptom": "intermittent_card_read_failure",
+          "customer_impact": "checkout_queue_delays",
+          "store_id": "0311",
+          "terminal_id": "checkout-3"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_7", "EMP_TOKEN_8203"],
+        "action_execution_mode": "auto-execute",
+        "action_api_call": "create_incident(ci=EFTPOS-TERM-0311-03, symptom=intermittent_card_read_failure, priority=P2)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": false,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "I've logged an incident for the intermittent card read failure at checkout 3. Your reference number is INC-2026-08872. I've attached known troubleshooting guidance for the technician."
+      },
+      "knowledge_agent_grounding": {
+        "invoked": true,
+        "invoked_by": "Agent Assist (on ticket assignment to L2 technician)",
+        "matched_kb_document_id": "SOP-EFTPOS-TERM-FAULT-001",
+        "matched_kb_title": "EFTPOS Terminal Card-Read & Connectivity Fault — Store Triage SOP",
+        "match_confidence": 0.88,
+        "retrieval_method": "semantic + keyword hybrid search",
+        "grounding_summary": "Retrieved SOP-EFTPOS-TERM-FAULT-001 based on symptom match (intermittent card-read failure, checkout terminal). Suggested first step: power-cycle terminal and check PIN pad cable seating before dispatching a hardware swap.",
+        "surfaced_to": "Field Technician via Agent Assist action checklist"
+      },
+      "resolution": {
+        "resolution_notes": "L2 technician applying SOP-EFTPOS-TERM-FAULT-001 step 2 (cable reseat and terminal reboot) on site. Awaiting confirmation of fix.",
+        "resolved_by": null,
+        "resolution_code": null,
+        "closure_notes_drafted_by_agent": false
+      },
+      "created_at": "2026-07-15T08:21:09+10:00",
+      "updated_at": "2026-07-15T09:05:44+10:00",
+      "resolved_at": null,
+      "sla": {
+        "response_target_minutes": 15,
+        "resolution_target_minutes": 240,
+        "response_actual_minutes": 6,
+        "resolution_actual_minutes": null,
+        "sla_breached": false
+      },
+      "assignment_group": "Store Technology Support L2",
+      "tags": ["voice-agent", "incident-creation", "eftpos", "payments", "knowledge-agent-grounded", "known-error", "sop-matched"]
+    },
+    {
+      "ticket_id": "INC-2026-08850",
+      "type": "incident",
+      "subtype": "incident_creation",
+      "title": "EFTPOS terminal card-read failure — store 0067 checkout 1 (resolved, feeds known-error pattern)",
+      "description": "Historical resolved incident of the same EFTPOS card-read fault pattern. Root cause and fix captured in SOP-EFTPOS-TERM-FAULT-001, which is now used by the Knowledge Agent to ground guidance for new matching incidents (see INC-2026-08872).",
+      "status": "resolved",
+      "priority": "P2",
+      "impact": "high",
+      "urgency": "high",
+      "category": "Payments & POS",
+      "subcategory": "EFTPOS Hardware Fault",
+      "affected_ci": "EFTPOS-TERM-0067-01",
+      "affected_service": "Store Payments Platform",
+      "store_location": "Store 0067 — Ringwood",
+      "requested_by": {
+        "pseudonym_token": "PERSON_8",
+        "role": "Store Team Member",
+        "employee_id_token": "EMP_TOKEN_4417",
+        "verification_method": "Entra ID deterministic verification (employee ID + DOB challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-7a12ff09-0332",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-007",
+        "call_duration_seconds": 96,
+        "intent_resolved": "incident_creation",
+        "intent_confidence": 0.92,
+        "slots_captured": {
+          "affected_ci": "EFTPOS-TERM-0067-01",
+          "symptom": "intermittent_card_read_failure",
+          "customer_impact": "checkout_queue_delays",
+          "store_id": "0067",
+          "terminal_id": "checkout-1"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_8", "EMP_TOKEN_4417"],
+        "action_execution_mode": "auto-execute",
+        "action_api_call": "create_incident(ci=EFTPOS-TERM-0067-01, symptom=intermittent_card_read_failure, priority=P2)",
+        "executed_by": "tool_proxy_function",
+        "human_approval_required": false,
+        "fallback_to_human_triggered": false,
+        "voice_confirmation_given": "I've logged an incident for the card read failure at checkout 1. Your reference number is INC-2026-08850."
+      },
+      "resolution": {
+        "resolution_notes": "Root cause: loose PIN pad cable connection causing intermittent card-read failure, exacerbated by terminal firmware not auto-recovering the connection. Fix: reseat cable and power-cycle terminal; escalate to hardware swap if fault recurs within 48 hours. Findings written back to knowledge base as SOP-EFTPOS-TERM-FAULT-001.",
+        "resolved_by": "Field Technician (L2, Store Technology Support)",
+        "resolution_code": "Resolved - Known Error Fix Applied",
+        "closure_notes_drafted_by_agent": true
+      },
+      "created_at": "2026-06-02T10:14:52+10:00",
+      "updated_at": "2026-06-02T12:40:19+10:00",
+      "resolved_at": "2026-06-02T12:40:19+10:00",
+      "sla": {
+        "response_target_minutes": 15,
+        "resolution_target_minutes": 240,
+        "response_actual_minutes": 9,
+        "resolution_actual_minutes": 146,
+        "sla_breached": false
+      },
+      "assignment_group": "Store Technology Support L2",
+      "tags": ["voice-agent", "incident-creation", "eftpos", "payments", "resolved", "source-of-sop-001", "known-error"],
+      "kb_contribution": {
+        "contributed_to_kb": true,
+        "kb_document_id": "SOP-EFTPOS-TERM-FAULT-001",
+        "contribution_type": "resolution_pattern_source"
+      }
+    },
+    {
+      "ticket_id": "INC-2026-08790",
+      "type": "incident",
+      "subtype": "status_check_with_escalation",
+      "title": "Refrigeration alarm panel fault — store 0198 cold room 2 (status check call escalated to human agent)",
+      "description": "Pre-existing incident logged three days prior for a refrigeration alarm panel fault. Caller phoned the Voice Agent to check status; the agent failed to resolve caller intent twice (ambiguous ticket reference, poor line quality) and escalated to a human service desk agent per the fallback-to-human guardrail.",
+      "status": "in_progress",
+      "priority": "P2",
+      "impact": "high",
+      "urgency": "medium",
+      "category": "Facilities & Refrigeration",
+      "subcategory": "Alarm Panel Fault",
+      "affected_ci": "REFRIG-PANEL-0198-CR2",
+      "affected_service": "Store Refrigeration Monitoring",
+      "store_location": "Store 0198 — Geelong",
+      "requested_by": {
+        "pseudonym_token": "PERSON_9",
+        "role": "Duty Manager",
+        "employee_id_token": "EMP_TOKEN_9012",
+        "verification_method": "Entra ID deterministic verification (employee ID + DOB challenge)",
+        "verification_result": "passed"
+      },
+      "channel": "voice",
+      "channel_detail": {
+        "interaction_id": "ACS-CALL-d90c2b6e-1187",
+        "correlation_id": "corr-8f3a1e20-19b4-4e3a-9d61-008",
+        "call_duration_seconds": 211,
+        "intent_resolved": "escalated_to_human",
+        "intent_confidence": 0.41,
+        "slots_captured": {
+          "referenced_ticket_number_spoken": "eight seven nine zero (partially recognised, low STT confidence due to line quality)",
+          "attempted_intent_1": "status_check",
+          "attempted_intent_1_result": "failed - ticket number not confidently resolved",
+          "attempted_intent_2": "status_check_retry",
+          "attempted_intent_2_result": "failed - caller reference still ambiguous between INC-2026-08790 and INC-2026-08791"
+        },
+        "pii_redaction_applied": true,
+        "pseudonymisation_tokens_used": ["PERSON_9", "EMP_TOKEN_9012"],
+        "action_execution_mode": "fallback_to_human",
+        "action_api_call": null,
+        "executed_by": null,
+        "human_approval_required": false,
+        "fallback_to_human_triggered": true,
+        "fallback_reason": "Two consecutive failed intent resolutions on the same call — hard guardrail per Voice Agent escalation policy (no confidence-threshold retry beyond two attempts)",
+        "voice_confirmation_given": "I'm having trouble confirming which ticket you're asking about. I'm transferring you now to a service desk agent who can help — please stay on the line."
+      },
+      "escalation": {
+        "escalated_at": "2026-07-13T16:47:02+10:00",
+        "escalated_to": "Service Desk L1 (live agent)",
+        "escalation_trigger": "fallback_to_human_after_two_failed_intent_resolutions",
+        "handover_context_passed": true,
+        "handover_summary": "Caller (Duty Manager, store 0198) calling about status of an open refrigeration alarm panel incident, likely INC-2026-08790 or INC-2026-08791. STT confidence low due to line quality. Full pseudonymised transcript attached for live agent context.",
+        "human_agent_resolution": "Live agent confirmed caller meant INC-2026-08790, provided status update: vendor technician scheduled for site visit next business day.",
+        "resumed_by_voice_agent": false
+      },
+      "resolution": {
+        "resolution_notes": "Underlying refrigeration incident still open and being tracked separately; this record reflects the voice status-check interaction and its escalation, not the refrigeration fault resolution.",
+        "resolved_by": null,
+        "resolution_code": null,
+        "closure_notes_drafted_by_agent": false
+      },
+      "created_at": "2026-07-10T07:55:18+10:00",
+      "updated_at": "2026-07-13T16:52:40+10:00",
+      "resolved_at": null,
+      "sla": {
+        "response_target_minutes": 15,
+        "resolution_target_minutes": 480,
+        "response_actual_minutes": 8,
+        "resolution_actual_minutes": null,
+        "sla_breached": false
+      },
+      "assignment_group": "Facilities & Refrigeration Support",
+      "tags": ["voice-agent", "status-check", "escalation", "fallback-to-human", "guardrail-triggered", "refrigeration"]
+    }
+  ]
+}
+ 

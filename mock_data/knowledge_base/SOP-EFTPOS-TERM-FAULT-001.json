@@ -1,0 +1,85 @@
+{
+  "$schema_note": "Mock extracted SOP document for Coles Knowledge Agent ingestion. Represents a structured extraction of an approved runbook/SOP PDF/Word doc into the Knowledge Agent's retrieval index (semantic + keyword hybrid search per Coles_Agentic_AI_PPT.pdf p.7). Consumed by Knowledge Agent, surfaced via Agent Assist to field technicians, and referenced by the Voice Agent's incident-creation flow for triage guidance.",
+  "kb_document_id": "SOP-EFTPOS-TERM-FAULT-001",
+  "document_type": "Standard Operating Procedure",
+  "title": "EFTPOS Terminal Card-Read & Connectivity Fault — Store Triage SOP",
+  "version": "2.3",
+  "status": "approved",
+  "owning_team": "Store Technology Support L2",
+  "last_reviewed_date": "2026-05-14",
+  "next_review_due": "2026-11-14",
+  "source_document": {
+    "original_filename": "SOP_EFTPOS_Terminal_CardRead_Fault_v2.3.docx",
+    "ingested_at": "2026-05-20T09:00:00+10:00",
+    "ingestion_pipeline": "AI Search hybrid ingestion (chunked, embedded, indexed)",
+    "approved_by": "Store Technology Support — Engineering Lead",
+    "content_freshness_flag": "current"
+  },
+  "applicability": {
+    "affected_ci_types": ["EFTPOS-TERM-*"],
+    "symptom_tags": [
+      "intermittent_card_read_failure",
+      "unresponsive_blank_screen",
+      "tap_not_recognised",
+      "chip_read_error",
+      "terminal_connectivity_drop"
+    ],
+    "related_services": ["Store Payments Platform"]
+  },
+  "summary": "Structured triage and remediation steps for EFTPOS terminal hardware faults presenting as intermittent card-read failure, unresponsive display, or connectivity drop. Derived from recurring incident resolution patterns (e.g. INC-2026-08850) and validated across multiple store sites.",
+  "sections": [
+    {
+      "section_id": "1",
+      "heading": "Symptom Triage",
+      "content": "Confirm the specific failure mode with the reporting team member: (a) terminal completely unresponsive / blank screen, (b) terminal powered on but intermittently fails to read chip or tap transactions, (c) terminal displays a persistent connectivity/offline error. Capture affected checkout/terminal ID and store ID before proceeding."
+    },
+    {
+      "section_id": "2",
+      "heading": "Step 1 — Power Cycle",
+      "content": "Instruct on-site staff to hold the power button for 10 seconds to force shutdown, wait 15 seconds, then power on. Allow up to 2 minutes for the terminal to reconnect to the store payment gateway. If this resolves the fault, monitor for recurrence over the next 48 hours before closing."
+    },
+    {
+      "section_id": "3",
+      "heading": "Step 2 — Cable and PIN Pad Connection Check",
+      "content": "If power cycling does not resolve an intermittent card-read failure, the most common root cause is a loose or partially seated PIN pad cable connection at the terminal base. Instruct staff (or dispatch a technician) to firmly reseat the cable connector, ensuring an audible click, then repeat Step 1 (power cycle). This step alone has resolved the majority of intermittent card-read incidents historically (see resolution pattern from INC-2026-08850)."
+    },
+    {
+      "section_id": "4",
+      "heading": "Step 3 — Firmware and Network Check",
+      "content": "If the fault persists after Steps 1–2, check the terminal's firmware version against the current approved baseline via the Store Payments Platform device management console. Confirm the terminal has network connectivity to the payment gateway (ping/heartbeat check). Apply pending firmware updates if the terminal is out of date."
+    },
+    {
+      "section_id": "5",
+      "heading": "Step 4 — Hardware Swap Escalation",
+      "content": "If the fault recurs within 48 hours of a successful Step 1/2 fix, or if Steps 1–3 do not resolve the issue, escalate for a hardware swap. Log a request with the Store Technology Support hardware pool referencing this SOP ID and the original incident number. Do not leave a faulty terminal in active use — direct staff to route customers to an alternate checkout."
+    },
+    {
+      "section_id": "6",
+      "heading": "Customer Impact Handling",
+      "content": "While the terminal is faulted, advise staff to redirect customers to the nearest working checkout. If store-wide EFTPOS impact is suspected (multiple terminals affected simultaneously), escalate immediately as a potential P1 and notify the Store Operations Duty Manager — this may indicate a payment gateway or network-level fault rather than a single terminal hardware issue."
+    }
+  ],
+  "linked_incidents": [
+    {
+      "ticket_id": "INC-2026-08850",
+      "relationship": "resolution_pattern_source",
+      "note": "Original resolved incident whose root cause and fix (cable reseat) formed the basis of Section 3 of this SOP."
+    },
+    {
+      "ticket_id": "INC-2026-08872",
+      "relationship": "sop_applied",
+      "note": "Knowledge Agent matched this SOP to the incident at 0.88 confidence and surfaced Section 3 guidance to the assigned L2 technician via Agent Assist."
+    },
+    {
+      "ticket_id": "INC-2026-08871",
+      "relationship": "candidate_match",
+      "note": "Symptom (unresponsive blank screen) partially overlaps this SOP's scope; eligible for Knowledge Agent matching once triaged by a technician."
+    }
+  ],
+  "retrieval_metadata": {
+    "embedding_model": "text-embedding (Foundry-hosted)",
+    "search_mode": "semantic + keyword hybrid",
+    "chunk_count": 6,
+    "traceability_note": "Each retrieved chunk carries this document's ID and version so Agent Assist / Voice Agent outputs referencing this SOP remain traceable back to the exact approved revision (per Coles_Agentic_AI_Architecture.md §6 auditability requirements)."
+  }
+}

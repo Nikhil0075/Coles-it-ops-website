@@ -1,0 +1,89 @@
+{
+  "$schema_note": "Mock extracted SOP/policy document for Coles Knowledge Agent ingestion. Represents the identity-verification and voice-channel action-scoping policy that governs which Voice Agent request types are eligible for auto-execution versus human approval. Consumed by Knowledge Agent and referenced by the Voice Agent's deterministic policy-check step (intent classification -> slot filling -> policy check -> ITSM action, per Voice_Assist.pdf and voice_assist_context_2 §1/§6 A16).",
+  "kb_document_id": "SOP-VOICE-IDENTITY-ACCESS-POLICY-002",
+  "document_type": "Policy / Standard Operating Procedure",
+  "title": "Voice Channel Identity Verification & Action Scoping Policy",
+  "version": "1.4",
+  "status": "approved",
+  "owning_team": "Identity & Access Management",
+  "last_reviewed_date": "2026-06-30",
+  "next_review_due": "2026-12-30",
+  "source_document": {
+    "original_filename": "Policy_Voice_Channel_Identity_Verification_v1.4.docx",
+    "ingested_at": "2026-07-01T09:00:00+10:00",
+    "ingestion_pipeline": "AI Search hybrid ingestion (chunked, embedded, indexed)",
+    "approved_by": "Identity & Access Management — Governance Lead",
+    "content_freshness_flag": "current"
+  },
+  "applicability": {
+    "affected_ci_types": ["ENTRA-CORP-ACCOUNTS", "POS-TERM-*", "SAP-RETAIL-*", "WFM-*"],
+    "symptom_tags": ["account_lockout", "password_reset", "access_request", "identity_verification"],
+    "related_services": ["Corporate Identity Platform", "Store POS Platform", "SAP Retail Platform", "Workforce Management Platform"]
+  },
+  "summary": "Defines which caller identity-verification method is required before any Voice Agent action, and which request types are approved for straight-through (auto-execute) resolution versus those that must always be routed for human approval, per the closed-set action policy (Voice Agent never infers a new action type).",
+  "sections": [
+    {
+      "section_id": "1",
+      "heading": "Caller Identity Verification (Mandatory, Pre-Agent-Turn)",
+      "content": "All callers must pass deterministic identity verification via Microsoft Entra ID before the Voice Agent processes any request-related intent. Verification is a challenge of employee ID plus one secondary factor (date of birth or line manager name, selected at random per call). Verification is never performed by the LLM — it is a deterministic service check that gates the conversation before any agent reasoning turn begins. A failed verification after two attempts ends the automated flow and routes to a human agent."
+    },
+    {
+      "section_id": "2",
+      "heading": "Auto-Execute Eligible Request Types",
+      "content": "The following request types are approved for straight-through voice-channel auto-execution, provided caller verification has passed and no elevated/privileged account flags are present on the target account: (a) Standard corporate Entra account password reset, (b) Store POS terminal login/PIN reset, (c) Incident creation for any store-level hardware or service fault (no approval needed to log an incident). These are narrow, low-risk, reversible actions with an existing automatable API (Entra ID / MIM) and have been explicitly approved for auto-execution per the progressive autonomy policy."
+    },
+    {
+      "section_id": "3",
+      "heading": "Approval-Required Request Types",
+      "content": "The following request types must always be routed to a human approver and are never auto-executed by the Voice Agent, regardless of caller verification outcome: (a) Any new system access grant (e.g. SAP Retail, Workforce Management) for the caller or a third party, (b) Any role-change or privilege-elevation request, (c) Password reset on an account flagged as privileged, executive, or holding elevated system entitlements, (d) Any request affecting a store's payment gateway configuration rather than a single terminal. The Voice Agent logs and routes these requests but takes no provisioning action itself; provisioning is completed by a human operator via the Identity & Access Management team after approval."
+    },
+    {
+      "section_id": "4",
+      "heading": "Excluded / Out-of-Scope Request Types",
+      "content": "The Voice Agent must not attempt password reset or access actions for: shared/generic store accounts, third-party vendor accounts, or any account where the caller is not the account owner and is not a verified manager/delegate acting on behalf of a named new starter. These fall outside the enumerated closed action set and must be redirected to the standard Identity & Access Management request channel."
+    },
+    {
+      "section_id": "5",
+      "heading": "PII Handling During Verification and Action Execution",
+      "content": "Caller name and employee ID are pseudonymised (stable tokens, e.g. PERSON_1, EMP_TOKEN_nnnn) before the transcript reaches the reasoning model. The tool proxy resolves pseudonyms to real identifiers only at the point of calling the target API (Entra ID / MIM or ITSM); the real identifier is never returned to the model or persisted in the transcript. Token-to-real-value mappings are held in an isolated, CMK-encrypted vault with a TTL matched to the associated ticket's lifecycle."
+    },
+    {
+      "section_id": "6",
+      "heading": "Escalation Guardrails",
+      "content": "Two consecutive failed intent resolutions on the same call trigger mandatory escalation to a human service desk agent, with full pseudonymised call context and transcript handed over. This is the sole automatic escalation trigger for the Voice Agent (no separate confidence-threshold escalation is defined for voice, unlike the Conversational Agent). A hard call timeout also applies regardless of intent-resolution outcome."
+    }
+  ],
+  "linked_tickets": [
+    {
+      "ticket_id": "REQ-2026-10231",
+      "relationship": "policy_applied",
+      "note": "Section 2(b) applied — POS terminal PIN reset auto-executed after passing verification."
+    },
+    {
+      "ticket_id": "REQ-2026-10245",
+      "relationship": "policy_applied",
+      "note": "Section 2(a) applied — standard corporate account reset auto-executed, no privileged flags present."
+    },
+    {
+      "ticket_id": "REQ-2026-10298",
+      "relationship": "policy_applied",
+      "note": "Section 3(a) applied — new-starter SAP Retail access request routed for line manager approval, not auto-executed."
+    },
+    {
+      "ticket_id": "REQ-2026-10312",
+      "relationship": "policy_applied",
+      "note": "Section 3(b) applied — role-change WFM approval-rights request routed for Store Operations Manager approval."
+    },
+    {
+      "ticket_id": "INC-2026-08790",
+      "relationship": "policy_applied",
+      "note": "Section 6 applied — two failed intent resolutions on the status-check call triggered mandatory human escalation."
+    }
+  ],
+  "retrieval_metadata": {
+    "embedding_model": "text-embedding (Foundry-hosted)",
+    "search_mode": "semantic + keyword hybrid",
+    "chunk_count": 6,
+    "traceability_note": "Referenced by the Voice Agent's policy-check step at runtime (not just post-hoc by human reviewers) to determine auto-execute vs approval-required routing for each resolved intent, per the deterministic closed-set action design in voice_assist_context_2 §1."
+  }
+}

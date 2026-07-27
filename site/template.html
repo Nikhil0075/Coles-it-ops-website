@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coles IT Ops · Agentic AI — Seven-Agent Programme</title>
+<style>
+:root{
+  --red:#E01A22; --red-d:#B3141B; --ink:#0C1220; --ink-2:#1A2333;
+  --slate:#5A6579; --line:#E3E7EE; --bg:#FFFFFF; --bg-2:#F6F8FB;
+  --blue:#3B6FD4; --green:#2E9E63; --amber:#D9930A; --violet:#7B54D6; --teal:#128C8C;
+  --r:16px; --max:1200px;
+  --f:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;font-family:var(--f);color:var(--ink);background:var(--bg);
+  -webkit-font-smoothing:antialiased;line-height:1.6}
+img{max-width:100%}
+a{color:inherit}
+code{font-family:var(--mono);font-size:.9em;background:#EEF1F6;padding:1px 5px;border-radius:4px}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+section{padding:96px 0;position:relative}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--red);margin:0 0 14px}
+h1,h2,h3,h4{margin:0;line-height:1.15;letter-spacing:-.02em}
+h2{font-size:clamp(28px,3.6vw,42px);font-weight:750;margin-bottom:16px}
+h3{font-size:20px;font-weight:700}
+.lede{font-size:clamp(16px,1.5vw,19px);color:var(--slate);max-width:74ch;margin:0 0 44px}
+.muted{color:var(--slate)} .small{font-size:13.5px}
+
+/* ── nav ───────────────────────────────── */
+header.nav{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.85);
+  backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:26px;height:64px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;letter-spacing:-.02em;
+  text-decoration:none;font-size:15.5px;white-space:nowrap}
+.brand .mark{width:26px;height:26px;border-radius:8px;background:var(--red);color:#fff;
+  display:grid;place-items:center;font-size:13px;font-weight:800}
+nav.links{display:flex;gap:20px;margin-left:auto;font-size:14px;font-weight:500}
+nav.links a{color:var(--slate);text-decoration:none;transition:color .15s}
+nav.links a:hover{color:var(--ink)}
+.burger{display:none;margin-left:auto;background:none;border:0;font-size:22px;cursor:pointer}
+@media(max-width:980px){
+  nav.links{display:none;position:absolute;top:64px;left:0;right:0;background:#fff;
+    flex-direction:column;padding:16px 28px 22px;border-bottom:1px solid var(--line);gap:14px}
+  nav.links.open{display:flex}
+  .burger{display:block}
+}
+
+/* ── hero ──────────────────────────────── */
+.hero{background:
+   radial-gradient(900px 460px at 12% -10%,rgba(224,26,34,.30),transparent 62%),
+   radial-gradient(760px 420px at 88% 8%,rgba(123,84,214,.26),transparent 60%),
+   linear-gradient(165deg,#0C1220 0%,#141C2E 55%,#0C1220 100%);
+  color:#fff;padding:100px 0 84px;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;opacity:.32;
+  background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);
+  background-size:56px 56px;mask-image:radial-gradient(70% 60% at 50% 30%,#000,transparent)}
+.hero .wrap{position:relative}
+.hero h1{font-size:clamp(34px,5.6vw,62px);font-weight:780;max-width:19ch}
+.hero h1 em{font-style:normal;background:linear-gradient(95deg,#FF6069,#FFA1A6 55%,#C9B6FF);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:#B9C3D6;font-size:clamp(16px,1.6vw,19.5px);max-width:66ch;margin:22px 0 34px}
+.pill{display:inline-flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.07);color:#E6ECF7;border-radius:999px;padding:7px 15px;
+  font-size:12.5px;font-weight:600;letter-spacing:.04em;margin-bottom:26px}
+.dot{width:7px;height:7px;border-radius:50%;background:#3ED07E;box-shadow:0 0 0 4px rgba(62,208,126,.2)}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:11px;
+  font-weight:650;font-size:15px;text-decoration:none;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn.p{background:var(--red);color:#fff;box-shadow:0 8px 26px rgba(224,26,34,.36)}
+.btn.s{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.24)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:62px;
+  border-top:1px solid rgba(255,255,255,.14);padding-top:30px}
+.stat b{display:block;font-size:clamp(26px,3.4vw,38px);font-weight:760;letter-spacing:-.03em;
+  background:linear-gradient(180deg,#fff,#9FB0CC);-webkit-background-clip:text;
+  background-clip:text;color:transparent}
+.stat span{font-size:13px;color:#95A3BC;line-height:1.45;display:block;margin-top:4px}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr);gap:26px}}
+
+/* ── generic ───────────────────────────── */
+.alt{background:var(--bg-2)}
+.grid{display:grid;gap:22px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:980px){.g3{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:680px){.g2,.g3{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;
+  transition:transform .18s,box-shadow .18s,border-color .18s}
+.card:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(12,18,32,.08);border-color:#CFD7E4}
+.card h3{margin-bottom:9px} .card p{margin:0;color:var(--slate);font-size:14.5px}
+.ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  font-size:16px;font-weight:800;margin-bottom:15px;background:#FDECEC;color:var(--red)}
+.ico.b{background:#EAF1FD;color:var(--blue)} .ico.g{background:#E7F6EE;color:var(--green)}
+.ico.a{background:#FDF3E0;color:var(--amber)} .ico.v{background:#F0EAFC;color:var(--violet)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.07em;
+  text-transform:uppercase;padding:4px 10px;border-radius:6px;background:#EEF1F6;color:var(--slate)}
+.tag.red{background:#FDECEC;color:var(--red-d)} .tag.grn{background:#E7F6EE;color:#1E7A48}
+.tag.vio{background:#F0EAFC;color:#5E38B5} .tag.blu{background:#EAF1FD;color:#2B54A8}
+.tag.amb{background:#FDF3E0;color:#96660A}
+
+/* ── problem ───────────────────────────── */
+.prob{border-left:3px solid var(--red);padding:4px 0 4px 22px;margin-bottom:26px}
+.prob h4{font-size:16.5px;margin-bottom:6px}
+.prob p{margin:0;color:var(--slate);font-size:14.5px}
+.quote{background:var(--ink);color:#fff;border-radius:var(--r);padding:34px 36px;
+  font-size:clamp(17px,2vw,22px);line-height:1.45;font-weight:600;letter-spacing:-.015em}
+.quote span{color:#FF7A82}
+
+/* ── layers ────────────────────────────── */
+.layer{display:grid;grid-template-columns:210px 1fr;gap:24px;align-items:start;
+  border:1px solid var(--line);border-left:5px solid var(--c,var(--slate));border-radius:14px;
+  background:#fff;padding:22px 24px;margin-bottom:14px;transition:box-shadow .18s,transform .18s}
+.layer:hover{box-shadow:0 12px 34px rgba(12,18,32,.07);transform:translateX(3px)}
+.layer .lh b{display:block;font-size:16.5px;letter-spacing:-.01em}
+.layer .lh span{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--c,var(--slate))}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-size:12.5px;padding:5px 11px;border-radius:7px;background:var(--bg-2);
+  border:1px solid var(--line);color:#3B475C;font-weight:500}
+.layer p{grid-column:1/-1;margin:4px 0 0;font-size:14px;color:var(--slate)}
+@media(max-width:760px){.layer{grid-template-columns:1fr;gap:12px}}
+.flowbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--ink);
+  color:#D4DCEA;border-radius:12px;padding:16px 20px;font-size:13px;font-family:var(--mono);
+  margin-bottom:34px;overflow-x:auto}
+.flowbar b{color:#fff;font-family:var(--f);font-weight:650}
+.flowbar i{color:var(--red);font-style:normal}
+
+/* ── diagram viewer (renders with JS disabled) ── */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:1px solid var(--line);background:#fff;padding:9px 16px;border-radius:10px;
+  font-size:13.5px;font-weight:600;cursor:pointer;color:var(--slate);transition:.15s;
+  font-family:var(--f);display:inline-flex;align-items:center;gap:8px}
+.tab:hover{border-color:#C3CCDB;color:var(--ink)}
+.tab.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.tab .bul{width:7px;height:7px;border-radius:50%;background:#3ED07E;flex:none}
+.tab .bul.pend{background:#C3CCDB}
+.tab.on .bul.pend{background:#6B7688}
+.viewer{border:1px solid var(--line);border-radius:var(--r);background:#fff;overflow:hidden}
+.vbar{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);
+  background:var(--bg-2);flex-wrap:wrap}
+.vbar .t{font-size:13.5px;font-weight:650}
+.vbar .sp{margin-left:auto;display:flex;gap:7px}
+.vb{border:1px solid var(--line);background:#fff;border-radius:8px;min-width:32px;height:32px;
+  cursor:pointer;font-size:15px;line-height:1;color:var(--slate);font-family:var(--f);padding:0 9px}
+.vb:hover{border-color:#B9C4D4;color:var(--ink)}
+.vb.w{font-size:13px;font-weight:600;padding:0 13px}
+.stage{overflow:auto;background:
+  radial-gradient(circle at 1px 1px,#E1E6ED 1px,transparent 0) 0 0/22px 22px,#FBFCFE;
+  max-height:80vh;padding:18px;cursor:grab}
+.stage.drag{cursor:grabbing}
+.zoomer{width:100%}                 /* JS only ever changes this width */
+.zoomer svg,.zoomer img{display:block;width:100%;height:auto}
+.dpane{display:none} .dpane.on{display:block}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--slate)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;
+  vertical-align:-1px;border:1px solid rgba(0,0,0,.12)}
+.pending{padding:56px 34px;text-align:center;background:
+  repeating-linear-gradient(135deg,#FBFCFE,#FBFCFE 10px,#F5F7FB 10px,#F5F7FB 20px)}
+.pending .badge{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.09em;
+  text-transform:uppercase;color:#8A97AC;border:1px solid #D5DCE7;background:#fff;
+  padding:5px 12px;border-radius:999px;margin-bottom:16px}
+.pending h4{font-size:19px;margin-bottom:8px}
+.pending p{color:var(--slate);font-size:14.5px;max-width:62ch;margin:0 auto}
+.pending .drop{margin-top:22px;display:inline-block;text-align:left;background:var(--ink);
+  color:#D4DCEA;border-radius:10px;padding:14px 18px;font-family:var(--mono);font-size:12.5px;
+  line-height:1.9}
+.pending .drop b{color:#fff;font-weight:600}
+.pending .drop u{color:#FF9AA0;text-decoration:none}
+
+/* ── agents ────────────────────────────── */
+.agent{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:#fff;
+  display:flex;flex-direction:column}
+.agent .top{padding:26px 28px;color:#fff}
+.agent.c-knowledge .top{background:linear-gradient(135deg,#B3141B,#E0562D)}
+.agent.c-predictive .top{background:linear-gradient(135deg,#5E38B5,#3B6FD4)}
+.agent.c-assist    .top{background:linear-gradient(135deg,#1B4A9E,#3B8FD4)}
+.agent.c-voice     .top{background:linear-gradient(135deg,#0E6E6E,#22A38C)}
+.agent.c-conv      .top{background:linear-gradient(135deg,#8A5A00,#D9930A)}
+.agent.c-rca       .top{background:linear-gradient(135deg,#4A3B75,#7B6BB5)}
+.agent.c-dcops     .top{background:linear-gradient(135deg,#204A3C,#3E8C6B)}
+.agent .top .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.agent .top h3{font-size:22px;margin-bottom:7px}
+.agent .top p{margin:0;font-size:14.5px;opacity:.92}
+.agent .body{padding:24px 28px 28px;flex:1;display:flex;flex-direction:column}
+.kv{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.kv:last-of-type{border:0}
+.kv b{min-width:112px;font-weight:650;font-size:12.5px;color:var(--slate);flex:none;
+  text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.eps{margin-top:auto;padding-top:16px}
+.ep{font-family:var(--mono);font-size:12.5px;background:var(--bg-2);border:1px solid var(--line);
+  border-radius:7px;padding:3px 8px;display:inline-block;margin:3px 5px 3px 0}
+.ep b{color:var(--red-d);font-weight:700}
+.ep.out{background:#fff;border-style:dashed}
+.wtag{background:rgba(255,255,255,.2);color:#fff}
+
+/* ── coverage table ────────────────────── */
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:14px;
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.tbl th,.tbl td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{background:var(--bg-2);font-size:12px;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--slate);font-weight:700}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-weight:650}
+.yes{color:var(--green);font-weight:700} .no{color:#B9C4D4;font-weight:700}
+.tblwrap{overflow-x:auto}
+
+/* ── phases ────────────────────────────── */
+.phases{background:var(--ink);color:#fff}
+.phases h2{color:#fff} .phases .lede{color:#96A3BB}
+.ph{position:relative;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);
+  border-radius:18px;padding:30px 26px;transition:.2s;overflow:hidden}
+.ph:hover{background:rgba(255,255,255,.075);transform:translateY(-4px)}
+.ph:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
+.ph .n{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--c)}
+.ph h3{font-size:21px;margin:9px 0 6px}
+.ph .sub{font-size:13px;color:#8E9CB6;margin:0 0 14px}
+.ph .who{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.ph .who span{font-size:11.5px;font-weight:650;padding:4px 9px;border-radius:6px;
+  background:rgba(255,255,255,.1);color:#D3DCEB}
+.ph ul{margin:0;padding:0;list-style:none}
+.ph li{font-size:14px;color:#C3CDDF;padding:8px 0 8px 24px;position:relative;
+  border-top:1px solid rgba(255,255,255,.07)}
+.ph li:first-child{border:0}
+.ph li:before{content:"";position:absolute;left:2px;top:15px;width:7px;height:7px;
+  border-radius:50%;background:var(--c);opacity:.85}
+.ladder{display:flex;margin-top:44px;border-radius:14px;overflow:hidden;
+  border:1px solid rgba(255,255,255,.12)}
+.ladder div{flex:1;padding:16px 18px;font-size:13.5px;font-weight:600;
+  border-right:1px solid rgba(255,255,255,.12);color:#B7C3D8}
+.ladder div:last-child{border:0}
+.ladder div small{display:block;font-weight:500;font-size:11.5px;color:#7E8DA8;margin-top:3px}
+.ladder div.now{background:rgba(224,26,34,.18);color:#fff}
+@media(max-width:760px){.ladder{flex-direction:column}
+  .ladder div{border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}}
+
+/* ── benefits ──────────────────────────── */
+.ben{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:26px;
+  display:flex;gap:18px;align-items:flex-start}
+.ben .num{font-size:30px;font-weight:780;letter-spacing:-.03em;color:var(--red);
+  line-height:1;flex:none;min-width:60px}
+.ben h4{font-size:16px;margin:0 0 5px} .ben p{margin:0;font-size:14px;color:var(--slate)}
+
+/* ── footer / lightbox ─────────────────── */
+footer{background:var(--ink-2);color:#8E9CB6;padding:52px 0 42px;font-size:13.5px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:26px;justify-content:space-between;align-items:center}
+footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacing:-.01em}
+.lb{display:none;position:fixed;inset:0;background:rgba(8,12,20,.93);z-index:200;
+  padding:22px;overflow:auto}
+.lb.on{display:block}
+.lb .x{position:fixed;top:18px;right:22px;background:rgba(255,255,255,.14);color:#fff;
+  border:0;width:42px;height:42px;border-radius:12px;font-size:20px;cursor:pointer;z-index:2}
+.lb .inner{background:#fff;border-radius:12px;padding:18px;width:max-content;margin:0 auto}
+.reveal{opacity:0;transform:translateY(22px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1)}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="mark">C</span> Coles IT Ops · Agentic AI</a>
+    <button class="burger" onclick="document.querySelector('nav.links').classList.toggle('open')">☰</button>
+    <nav class="links">
+      <a href="#problem">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#layers">Data flow</a>
+      <a href="#diagrams">Architecture</a>
+      <a href="#agents">Agents</a>
+      <a href="#phases">Phases</a>
+      <a href="#benefits">Benefits</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══ HERO ═══ -->
+<div class="hero" id="top">
+  <div class="wrap">
+    <div class="pill"><span class="dot"></span> Microsoft AI Foundry · Australia East / Southeast · Advisory-first</div>
+    <h1>Agentic AI for Coles IT Operations, built on <em>evidence, not vibes</em>.</h1>
+    <p>Seven agents, one governed platform, three delivery phases. Every agent shares the same gateway, the same
+       identity model and the same grounding plane — so the second agent is cheaper than the first, and the seventh
+       is cheaper still.</p>
+    <div class="btns">
+      <a class="btn p" href="#diagrams">Explore the architecture →</a>
+      <a class="btn s" href="#agents">Meet the seven agents</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>7</b><span>Agents on one shared platform rail</span></div>
+      <div class="stat"><b>6</b><span>Non-negotiable architecture principles (P1–P6)</span></div>
+      <div class="stat"><b>3</b><span>Delivery phases, autonomy earned at each</span></div>
+      <div class="stat"><b>100%</b><span>Answers carry a citation, or they are blocked</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PROBLEM ═══ -->
+<section id="problem">
+  <div class="wrap">
+    <p class="eyebrow">Problem statement</p>
+    <h2>Knowledge is scattered. Failure is repetitive. Both cost the same thing — time.</h2>
+    <p class="lede">Coles IT Operations runs a national estate: stores, checkouts, EFTPOS, refrigeration, distribution
+      centres and the platforms behind them. Two structural problems drive most of the avoidable effort.</p>
+
+    <div class="grid g2" style="margin-bottom:44px">
+      <div>
+        <div class="prob"><h4>Answers live in people, not systems</h4>
+          <p>Runbooks, SOPs, the known-error database and past RCAs sit in different repositories with different
+             owners. The fastest path to an answer is asking whoever handled it last time.</p></div>
+        <div class="prob"><h4>Knowledge decays silently</h4>
+          <p>Nobody is measurably accountable for staleness, duplication or contradiction. A runbook can be wrong for
+             months before anyone notices — usually mid-incident.</p></div>
+        <div class="prob"><h4>Every incident is solved from scratch</h4>
+          <p>Resolved incidents rarely become reusable articles. The same EFTPOS terminal fault gets re-diagnosed at
+             a fourth store because the first three fixes were never written down.</p></div>
+      </div>
+      <div>
+        <div class="prob"><h4>Operations is reactive by design</h4>
+          <p>Monitoring tells you a threshold has already been breached. Recurrence, seasonality and slow degradation
+             are visible in the data but nobody has time to look for them.</p></div>
+        <div class="prob"><h4>Signals never meet each other</h4>
+          <p>Ticket trends sit in one platform, telemetry in another, change records in a third. The correlation that
+             explains a problem is real — it's just never assembled.</p></div>
+        <div class="prob"><h4>And the obvious fix is the dangerous one</h4>
+          <p>A chatbot over the wiki produces confident, unsourced, occasionally wrong answers — and puts customer and
+             team-member data in front of a model. That failure mode is worse than the problem.</p></div>
+      </div>
+    </div>
+
+    <div class="quote">The hard requirement isn't "add AI to IT Ops". It's:
+      <span>never answer without evidence, never expose raw PII to a model, and never let an agent change a live
+      system on its own.</span> Every design decision below follows from those three.</div>
+  </div>
+</section>
+
+<!-- ═══ SOLUTION ═══ -->
+<section id="solution" class="alt">
+  <div class="wrap">
+    <p class="eyebrow">The solution</p>
+    <h2>Seven agents, one governed platform</h2>
+    <p class="lede">Every agent runs on Microsoft AI Foundry behind a single API Management gateway, authenticates
+      with its own Entra Agent ID, and reaches knowledge through the same grounding plane. They reason; they never
+      execute. Everything they say is traceable back to a document, a model run or a change record.</p>
+
+    <h3 style="margin-bottom:6px">The six principles everything is built on</h3>
+    <p class="muted small" style="margin:0 0 24px">Enforced in infrastructure — not in prompts. A prompt can be
+      argued with; a policy cannot.</p>
+    <div class="grid g3">
+      <div class="card"><div class="ico b">P1</div><h3>Agents reason, never execute</h3>
+        <p>State changes go through an Action API with idempotency keys, approvals and rollback. Agents emit
+           intent, not effect.</p></div>
+      <div class="card"><div class="ico">P2</div><h3>No raw PII reaches a model</h3>
+        <p>A mandatory de-identification tier pseudonymises every inbound request with stable reversible tokens.
+           The token vault is unreachable by the agent's own identity; re-identification happens at render time,
+           for entitled users only.</p></div>
+      <div class="card"><div class="ico g">P3</div><h3>No answer without evidence</h3>
+        <p>A paired critic checks every claim against a retrieved chunk. Ungrounded output is <b>blocked</b> and
+           handed to a human — never surfaced with a caveat.</p></div>
+      <div class="card"><div class="ico a">P4</div><h3>Every action attributable</h3>
+        <p>One correlation ID spans channel → gateway → workflow → agent → tool → ITSM. Signed, immutable run
+           records land in ADLS under legal hold.</p></div>
+      <div class="card"><div class="ico v">P5</div><h3>Autonomy is earned</h3>
+        <p>Advisory → suggest → approve-and-execute → auto-execute, configured per action type and promoted only
+           on measured evaluation evidence.</p></div>
+      <div class="card"><div class="ico b">P6</div><h3>Stateless agents, stateful workflows</h3>
+        <p>Long-running work — weekly watchlist runs, curation sweeps — lives in Durable Functions, not in the
+           agent's head.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ LAYERS / DATA FLOW ═══ -->
+<section id="layers">
+  <div class="wrap">
+    <p class="eyebrow">Data flow · architecture layers</p>
+    <h2>How a question becomes a grounded answer</h2>
+    <p class="lede">Every call — from a human, a dashboard or another agent — takes the same path through the same
+      seven layers. There are no point-to-point integrations.</p>
+
+    <div class="flowbar">
+      <b>Caller</b> <i>→</i> Front Door + WAF <i>→</i> App Gateway <i>→</i> APIM AI Gateway <i>→</i>
+      <b style="color:#FF7A82">De-identification</b> <i>→</i> Foundry Agent <i>→</i> Tools &amp; grounding
+      <i>→</i> <b style="color:#3ED07E">Critic</b> <i>→</i> Signed run record
+    </div>
+
+    <div class="layer" style="--c:var(--blue)">
+      <div class="lh"><span>Layer 1</span><b>Consumers</b></div>
+      <div class="chips"><span class="chip">Agent Assist</span><span class="chip">Voice Agent</span>
+        <span class="chip">Conversational Agent</span><span class="chip">RCA Agent</span>
+        <span class="chip">DC Ops Agent</span><span class="chip">Ops dashboards / Teams</span>
+        <span class="chip">Engineers &amp; knowledge owners</span></div>
+      <p>Every call carries an Entra Agent ID token (on-behalf-of for user-initiated requests), an APIM subscription
+         key, a correlation ID and the calling agent's name.</p>
+    </div>
+
+    <div class="layer" style="--c:var(--green)">
+      <div class="lh"><span>Layer 2</span><b>Ingress rail</b></div>
+      <div class="chips"><span class="chip">Front Door Premium + WAF</span>
+        <span class="chip">App Gateway WAF v2</span><span class="chip">APIM Premium v2 · AI Gateway</span>
+        <span class="chip">token limits</span><span class="chip">semantic cache</span>
+        <span class="chip">Prompt Shields</span><span class="chip">circuit breaker</span></div>
+      <p>OWASP rules, bot protection and AU geo-fencing at the edge; per-consumer token quotas, Redis semantic cache
+         and content-safety prompt shielding at the gateway. APIM authenticates to Foundry with a managed identity —
+         no model keys ever sit in application code.</p>
+    </div>
+
+    <div class="layer" style="--c:var(--red)">
+      <div class="lh"><span>Layer 3</span><b>De-identification tier</b></div>
+      <div class="chips"><span class="chip">Azure AI Language PII detect</span>
+        <span class="chip">Coles custom recognisers</span><span class="chip">stable pseudonyms</span>
+        <span class="chip">Cosmos token vault (CMK)</span><span class="chip">render-time re-identification</span></div>
+      <p>Mandatory, and it sits between every channel and every model call. Employee number, store number,
+         team-member ID and loyalty ID are detected by custom recognisers, then replaced with stable reversible
+         tokens (<code>PERSON_1</code>, <code>EMP_0042</code>) rather than masked — masking would destroy the
+         coreference the model needs. Redaction fires at confidence ≥ 0.5 and fails closed.</p>
+    </div>
+
+    <div class="layer" style="--c:var(--amber)">
+      <div class="lh"><span>Layer 4</span><b>Agent plane</b></div>
+      <div class="chips"><span class="chip">Foundry prompt agents</span>
+        <span class="chip">hosted container agents</span>
+        <span class="chip">Durable Functions orchestration</span><span class="chip">MCP Toolbox</span>
+        <span class="chip">model router (mini / reasoning)</span></div>
+      <p>Stateless, session-isolated, managed-identity agents that see pseudonyms only. Long-running flows are
+         orchestrated outside the agent so a restart never loses a workflow.</p>
+    </div>
+
+    <div class="layer" style="--c:#6B7688">
+      <div class="lh"><span>Layer 5</span><b>Grounding &amp; data</b></div>
+      <div class="chips"><span class="chip">Foundry IQ</span>
+        <span class="chip">Azure AI Search — hybrid BM25 + vector</span><span class="chip">semantic ranker</span>
+        <span class="chip">Document Intelligence</span><span class="chip">ADLS Gen2</span>
+        <span class="chip">Cosmos DB</span><span class="chip">Fabric OneLake</span>
+        <span class="chip">Managed Redis</span></div>
+      <p>One index per corpus — runbooks, SOPs, KEDB, RCA library, CMDB descriptions — each security-trimmed by
+         Entra group so retrieval never exceeds the caller's own entitlements. Content is PII-redacted
+         <b>at index time</b>: a successful prompt injection cannot exfiltrate what was never indexed.</p>
+    </div>
+
+    <div class="layer" style="--c:#2E9E63">
+      <div class="lh"><span>Layer 6</span><b>Classical analytics plane</b></div>
+      <div class="chips"><span class="chip">Azure ML forecasting (versioned)</span>
+        <span class="chip">Azure ML anomaly detection</span><span class="chip">Fabric analytics</span>
+        <span class="chip">Event Hubs telemetry</span><span class="chip">deterministic risk scorer</span></div>
+      <p>Predictive-only. This is where the maths happens, and it is auditable and reproducible: every projection
+         carries its model version and run ID. Risk scores are computed by a deterministic function, not by a
+         language model.</p>
+    </div>
+
+    <div class="layer" style="--c:var(--violet)">
+      <div class="lh"><span>Layer 7</span><b>Trust rail (cross-cutting)</b></div>
+      <div class="chips"><span class="chip">Entra Agent ID</span><span class="chip">Purview DSPM for AI</span>
+        <span class="chip">Content Safety + Prompt Shields</span><span class="chip">groundedness critics</span>
+        <span class="chip">App Insights + OTel</span><span class="chip">immutable run records</span>
+        <span class="chip">VNet + Private Endpoints</span></div>
+      <p>Applies to every call in every layer. Each agent is a first-class security principal with its own RBAC and
+         Conditional Access, and every output is a signed record you can replay months later.</p>
+    </div>
+
+    <div class="grid g3" style="margin-top:44px">
+      <div class="card"><span class="tag blu">Sync</span><h3 style="margin-top:12px">Request path</h3>
+        <p>REST through APIM. Under load, knowledge queries degrade to retrieval-only rather than failing outright.</p></div>
+      <div class="card"><span class="tag grn">Async</span><h3 style="margin-top:12px">Event path</h3>
+        <p>Service Bus topics <code>knowledge.ingest</code> and <code>predictive.risk-alerts</code>; Event Grid for
+           doc, ITSM and monitor events; Event Hubs streams telemetry to Predictive.</p></div>
+      <div class="card"><span class="tag">Resilience</span><h3 style="margin-top:12px">Active-active</h3>
+        <p>Australia East / Southeast, Cosmos multi-region write, AI Search replicas ≥ 3. RPO 15 min, RTO 1 h for
+           agent state — the index itself is rebuildable from source of truth.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DIAGRAMS ═══ -->
+<section id="diagrams" class="alt">
+  <div class="wrap">
+    <p class="eyebrow">Architecture diagrams</p>
+    <h2>The full picture</h2>
+    <p class="lede">One diagram per agent, plus the combined platform overview. Drag to pan, zoom with the controls,
+      or open full screen. A green dot means the diagram is in; a grey dot means the slot is reserved and waiting
+      for the file.</p>
+
+    <div class="tabs">__DIAGRAM_TABS__</div>
+    __DIAGRAM_PANES__
+
+    <div class="legend">
+      <span><i style="background:#1AA179;border-radius:50%"></i>Numbered badge — order of the flow</span>
+      <span><i style="background:#C9354F"></i>Critic / blocking gate — ungrounded output stops here</span>
+      <span><i style="background:#F5C243"></i>Human step — draft, review, approve</span>
+      <span><i style="background:#C13BC4"></i>LLM step — explains, never decides</span>
+      <span><i style="background:#19A08C"></i>Agent output — evidence-bound</span>
+      <span><i style="background:#DDE3EE"></i>Grey band — architecture layer</span>
+      <span><i style="background:linear-gradient(90deg,#4A5568 40%,transparent 40%,transparent 60%,#4A5568 60%)"></i>Dashed line — asynchronous / event-driven</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AGENTS ═══ -->
+<section id="agents">
+  <div class="wrap">
+    <p class="eyebrow">The seven agents</p>
+    <h2>What each one does</h2>
+    <p class="lede">All seven expose or consume REST APIs at <code>https://api.coles-itops.internal</code>.
+      Knowledge and Predictive are designed in full detail; the other five are specified at capability level and
+      run on the same rail.</p>
+
+    <div class="grid g2">
+
+      <!-- Knowledge -->
+      <div class="agent c-knowledge">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 01</span><span class="tag wtag">Foundry prompt agent</span>
+            <span class="tag wtag">Detailed design ✓</span></div>
+          <h3>Knowledge Agent</h3>
+          <p>Grounded answers from runbooks, SOPs and previous incidents — or an explicit block.</p></div>
+        <div class="body">
+          <div class="kv"><b>Serve loop</b><span>Query Decomposer → Multi-Query Retriever (Foundry IQ) → Reranker →
+            Answer Synthesiser + Citation Builder → <b>Groundedness Critic</b></span></div>
+          <div class="kv"><b>Curate loop</b><span>Freshness Checker · Duplicate/Conflict Detector · KB-Gap Detector ·
+            Article Drafter — output is always a draft PR; a human publishes</span></div>
+          <div class="kv"><b>Grounding</b><span>Azure AI Search hybrid BM25 + vector with semantic ranker, one index
+            per corpus, security-trimmed by Entra group</span></div>
+          <div class="kv"><b>Failure mode</b><span>Below the groundedness threshold it returns
+            <code>NOT_GROUNDED</code> with a structured handover — it does not guess and it does not caveat</span></div>
+          <div class="kv"><b>Roles</b><span><code>Knowledge.Query</code> · <code>Knowledge.Curate</code></span></div>
+          <div class="eps"><span class="ep"><b>POST</b> /query</span><span class="ep"><b>POST</b> /search</span>
+            <span class="ep"><b>POST</b> /ingest</span><span class="ep"><b>GET</b> /freshness/report</span>
+            <span class="ep"><b>GET</b> /gaps</span><span class="ep"><b>POST</b> /articles/draft</span>
+            <span class="ep"><b>GET</b> /health</span></div>
+        </div>
+      </div>
+
+      <!-- Predictive -->
+      <div class="agent c-predictive">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 02</span><span class="tag wtag">Hosted container agent</span>
+            <span class="tag wtag">Detailed design ✓</span></div>
+          <h3>Predictive Agent</h3>
+          <p>Operational trends and early risk warnings. Advisory only — zero write authority.</p></div>
+        <div class="body">
+          <div class="kv"><b>Reads</b><span>Ticket Trend Reader (Fabric OneLake) · Metrics Trend Reader (Event Hubs) ·
+            Change Correlator (ITSM read API)</span></div>
+          <div class="kv"><b>Maths</b><span>Forecaster and Anomaly Detector on versioned Azure ML models; Risk Scorer
+            is a deterministic function — not LLM-scored, so it's reproducible</span></div>
+          <div class="kv"><b>LLM's job</b><span>Narrative Explainer only: what it noticed, why it matters, what to
+            check — policed by an <b>Evidence Critic</b> that strips any sentence not bound to a model output or
+            change record</span></div>
+          <div class="kv"><b>Cross-reference</b><span>Calls Knowledge <code>POST /query</code> to attach the relevant
+            runbook to each risk</span></div>
+          <div class="kv"><b>Feedback</b><span>Outcomes (confirmed / false alarm / prevented) recorded to Cosmos —
+            accuracy is the currency that buys autonomy promotion</span></div>
+          <div class="kv"><b>Roles</b><span><code>Predictive.Read</code> · <code>Predictive.Feedback</code></span></div>
+          <div class="eps"><span class="ep"><b>GET</b> /risks</span><span class="ep"><b>GET</b> /watchlist/weekly</span>
+            <span class="ep"><b>POST</b> /forecast</span><span class="ep"><b>POST</b> /trends/analyze</span>
+            <span class="ep"><b>POST</b> /feedback</span><span class="ep"><b>GET</b> /health</span></div>
+        </div>
+      </div>
+
+      <!-- Agent Assist -->
+      <div class="agent c-assist">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 03</span><span class="tag wtag">Phase 1</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>Agent Assist</h3>
+          <p>The engineer's co-pilot inside the ITSM console. It suggests; the human acts.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Sits beside the ticket. On open it pulls the relevant runbook steps and
+            similar past incidents, so the engineer starts from the best-known answer instead of a search box.</span></div>
+          <div class="kv"><b>How</b><span>Calls Knowledge <code>POST /query</code> with the ticket's context —
+            ticket ID, affected system, store ID — and renders the answer with its citations inline.</span></div>
+          <div class="kv"><b>Autonomy</b><span>Suggest only. It never updates or resolves a ticket by itself; it
+            pre-fills and the engineer confirms.</span></div>
+          <div class="kv"><b>Why first</b><span>Highest-value, lowest-risk consumer of the Knowledge Agent — and the
+            fastest way to prove groundedness in front of real engineers.</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
+            <span class="ep out">knowledge <b>POST</b> /query</span></div>
+        </div>
+      </div>
+
+      <!-- Voice -->
+      <div class="agent c-voice">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 04</span><span class="tag wtag">Phase 2</span>
+            <span class="tag wtag">Policy defined ✓</span></div>
+          <h3>Voice Agent</h3>
+          <p>The phone line for stores. Identity is verified deterministically, before the model ever speaks.</p></div>
+        <div class="body">
+          <div class="kv"><b>Flow</b><span>Identity verification → intent classification → slot filling →
+            deterministic policy check → ITSM action. The LLM never performs the verification.</span></div>
+          <div class="kv"><b>Identity</b><span>Entra ID challenge: employee ID plus one randomly selected secondary
+            factor. Two failed attempts ends the automated flow and routes to a human.</span></div>
+          <div class="kv"><b>Auto-execute</b><span>A closed set only — corporate password reset, POS terminal
+            login/PIN reset, and logging an incident. Narrow, low-risk, reversible, already automatable.</span></div>
+          <div class="kv"><b>Always human</b><span>Access requests and anything touching a privileged account route
+            to an approver, regardless of how confident the agent is.</span></div>
+          <div class="kv"><b>Knowledge</b><span>Calls <code>POST /query</code> with
+            <code>response_mode: voice_short</code> — answers a person can actually listen to.</span></div>
+          <div class="kv"><b>Governed by</b><span><code>SOP-VOICE-IDENTITY-ACCESS-POLICY-002</code> v1.4 —
+            Identity &amp; Access Management</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
+            <span class="ep out">knowledge <b>POST</b> /query</span></div>
+        </div>
+      </div>
+
+      <!-- Conversational -->
+      <div class="agent c-conv">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 05</span><span class="tag wtag">Phase 2</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>Conversational Agent</h3>
+          <p>Self-service in Teams and the support portal — for the questions that never needed a ticket.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Answers store and support staff directly, with source links, deflecting
+            the routine questions that currently arrive as tickets.</span></div>
+          <div class="kv"><b>How</b><span>Same <code>POST /query</code> route, same groundedness critic, same
+            security trimming — a user only ever retrieves what their own Entra groups permit.</span></div>
+          <div class="kv"><b>Failure mode</b><span>Where it can't ground an answer it says so and raises a ticket
+            with the full context attached, rather than improvising. Those unanswered questions feed the Knowledge
+            Agent's gap backlog.</span></div>
+          <div class="kv"><b>Autonomy</b><span>Advisory. It answers, and it can log a ticket; it changes nothing
+            else.</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
+            <span class="ep out">knowledge <b>POST</b> /query</span></div>
+        </div>
+      </div>
+
+      <!-- RCA -->
+      <div class="agent c-rca">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 06</span><span class="tag wtag">Phase 3</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>RCA Agent</h3>
+          <p>Assembles the evidence for root-cause analysis — and closes the loop back into knowledge.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Gathers timeline, telemetry, change records and prior similar incidents
+            into a drafted root-cause analysis for a human to challenge and approve.</span></div>
+          <div class="kv"><b>How</b><span>Calls Knowledge <code>POST /search</code> for raw ranked passages rather
+            than a synthesised answer — it does its own reasoning over the evidence.</span></div>
+          <div class="kv"><b>The loop</b><span>On approval it publishes to the Service Bus topic
+            <code>knowledge.ingest</code>, turning the RCA into a KB candidate. <b>This is the mechanism that makes
+            knowledge compound</b> instead of decay.</span></div>
+          <div class="kv"><b>Autonomy</b><span>Draft only. No RCA is published, and no article created, without a
+            named human approving it.</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls / publishes</span><br>
+            <span class="ep out">knowledge <b>POST</b> /search</span>
+            <span class="ep out">sb <b>topic</b> knowledge.ingest</span></div>
+        </div>
+      </div>
+
+      <!-- DC Ops -->
+      <div class="agent c-dcops">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 07</span><span class="tag wtag">Phase 3</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>DC Ops Agent</h3>
+          <p>Distribution centre and data centre operations — where prediction meets the floor.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Playbook lookup for DC incidents, capacity checks before they bite, and
+            confirmation of whether a predicted risk actually materialised.</span></div>
+          <div class="kv"><b>Knowledge</b><span>Calls <code>POST /query</code> for the relevant playbook or runbook,
+            cited.</span></div>
+          <div class="kv"><b>Predictive</b><span>Calls <code>POST /forecast</code> for capacity and breach-date
+            projections, and <code>POST /feedback</code> to record the outcome — confirmed, false alarm or
+            prevented.</span></div>
+          <div class="kv"><b>Why it matters</b><span>It supplies ground truth. Prediction accuracy is the evidence
+            that justifies promoting any agent up the autonomy ladder (P5).</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
+            <span class="ep out">knowledge <b>POST</b> /query</span>
+            <span class="ep out">predictive <b>POST</b> /forecast</span>
+            <span class="ep out">predictive <b>POST</b> /feedback</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card" style="margin-top:26px;background:var(--bg-2)">
+      <span class="tag red">Worked example — all the way through</span>
+      <h3 style="margin-top:12px">EFTPOS terminal offline, store 0417</h3>
+      <p style="margin-top:8px">A store rings the <b>Voice Agent</b>. Identity is verified deterministically against
+        Entra before any model turn; the intent classifies as an incident, which is on the auto-execute list, so
+        <code>INC-2026-08872</code> is logged. <b>Agent Assist</b> opens the ticket for the engineer with the answer
+        already there — grounded in <code>SOP-EFTPOS-TERM-FAULT-001</code>, with section, version, last-updated date
+        and the prior incident it was derived from. Meanwhile the <b>Predictive Agent</b> has already raised
+        <code>RSK-2026-0713</code>: <i>"store 0417 EFTPOS recurrence — 4th occurrence this quarter"</i>, evidenced by
+        three incident IDs, with the same SOP cross-referenced and a recommendation to check the terminal firmware
+        baseline. The <b>RCA Agent</b> assembles the analysis; once a human approves it, it publishes to
+        <code>knowledge.ingest</code> and becomes a new KB article. The fifth store never has this problem.
+        <b>At no point did an agent change a live system on its own.</b></p>
+    </div>
+
+    <h3 style="margin:52px 0 8px">Design coverage</h3>
+    <p class="muted small" style="margin:0 0 20px">Where each agent currently sits.</p>
+    <div class="tblwrap"><table class="tbl">
+      <tr><th>Agent</th><th>Phase</th><th>Detailed spec</th><th>Endpoints defined</th><th>Diagram</th><th>Autonomy today</th></tr>
+      <tr><td>Knowledge</td><td>1–2</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>Advisory / draft-only</td></tr>
+      <tr><td>Predictive</td><td>2</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>Advisory (level 1, all actions)</td></tr>
+      <tr><td>Agent Assist</td><td>1</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Suggest</td></tr>
+      <tr><td>Voice</td><td>2</td><td class="yes">✓ policy</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Auto-execute, closed set</td></tr>
+      <tr><td>Conversational</td><td>2</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Advisory</td></tr>
+      <tr><td>RCA</td><td>3</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Draft only</td></tr>
+      <tr><td>DC Ops</td><td>3</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Advisory</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ═══ PHASES ═══ -->
+<section id="phases" class="phases">
+  <div class="wrap">
+    <p class="eyebrow" style="color:#FF7A82">Delivery roadmap</p>
+    <h2>Three phases, and autonomy earned at each one</h2>
+    <p class="lede">The seven-agent programme lands in three phases. Scope widens only when the previous phase has
+      the evaluation evidence to justify it.</p>
+
+    <div class="grid g3">
+      <div class="ph" style="--c:#4FA3F7">
+        <div class="n">PHASE 01</div>
+        <h3>Ground truth</h3>
+        <p class="sub">Establish the platform and make knowledge trustworthy.</p>
+        <div class="who"><span>Knowledge — serve</span><span>Agent Assist</span></div>
+        <ul>
+          <li>Platform rail: Front Door → App Gateway → APIM AI Gateway, Entra Agent ID, VNet + Private Endpoints</li>
+          <li>De-identification tier and token vault live before any model call</li>
+          <li><b>Knowledge Agent serve loop</b>: grounded Q&amp;A with citations, groundedness critic blocking</li>
+          <li><b>Agent Assist</b> consuming <code>POST /query</code> beside the ticket</li>
+          <li>Corpora indexed and security-trimmed: runbooks, SOPs, KEDB</li>
+        </ul>
+      </div>
+      <div class="ph" style="--c:#B08CFF">
+        <div class="n">PHASE 02</div>
+        <h3>Foresight &amp; reach</h3>
+        <p class="sub">See problems earlier; meet people where they already are.</p>
+        <div class="who"><span>Predictive</span><span>Knowledge — curate</span><span>Voice</span><span>Conversational</span></div>
+        <ul>
+          <li><b>Predictive Agent</b>: classical forecasting and anomaly models, deterministic risk scorer, weekly
+              watchlist</li>
+          <li><b>Knowledge curate loop</b>: freshness, duplicate/conflict and gap detection; article drafting as
+              draft PRs</li>
+          <li><b>Voice Agent</b> on the closed-set action policy — deterministic identity verification first</li>
+          <li><b>Conversational Agent</b> for self-service deflection on the same grounded route</li>
+          <li>Feedback loop closed — prediction accuracy becomes a reported KPI</li>
+        </ul>
+      </div>
+      <div class="ph" style="--c:#FF8A62">
+        <div class="n">PHASE 03</div>
+        <h3>Compounding &amp; autonomy</h3>
+        <p class="sub">Knowledge that grows itself; execution that has earned the right.</p>
+        <div class="who"><span>RCA</span><span>DC Ops</span><span>Action API</span></div>
+        <ul>
+          <li><b>RCA Agent</b> publishing approved analyses to <code>knowledge.ingest</code> — incidents become
+              articles</li>
+          <li><b>DC Ops Agent</b> using forecasts for capacity and confirming prediction outcomes</li>
+          <li>Action API layer: idempotency keys, approvals, rollback</li>
+          <li>Selected action types promoted to approve-and-execute on eval evidence (P5)</li>
+          <li>Active-active AU East / AU Southeast at full production posture</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ladder">
+      <div class="now">1 · Advisory<small>Where most agents sit today — recommend only</small></div>
+      <div>2 · Suggest<small>Pre-filled actions a human confirms</small></div>
+      <div>3 · Approve &amp; execute<small>Agent acts after explicit approval</small></div>
+      <div>4 · Auto-execute<small>Narrow, well-evidenced action types only</small></div>
+    </div>
+    <p class="small" style="color:#7E8DA8;margin-top:14px">Autonomy is configured per action type, never per agent.
+      The Voice Agent already auto-executes three specific low-risk actions while staying advisory for everything
+      else — that is the model, and every promotion has to be justified by measured evaluation results.</p>
+  </div>
+</section>
+
+<!-- ═══ BENEFITS ═══ -->
+<section id="benefits">
+  <div class="wrap">
+    <p class="eyebrow">Benefits</p>
+    <h2>What Coles gets out of it</h2>
+    <p class="lede">Some of this is speed. Most of it is that the organisation stops paying the same cost twice.</p>
+
+    <div class="grid g2">
+      <div class="ben"><div class="num">01</div><div><h4>Faster, consistent resolution</h4>
+        <p>The same grounded answer reaches every channel — assist, voice, self-service — instead of depending on
+           who happens to be on shift.</p></div></div>
+      <div class="ben"><div class="num">02</div><div><h4>Knowledge that maintains itself</h4>
+        <p>Staleness, duplicates and contradictions are surfaced continuously rather than discovered mid-incident.
+           Gaps become a prioritised backlog instead of tribal folklore.</p></div></div>
+      <div class="ben"><div class="num">03</div><div><h4>Incidents compound into assets</h4>
+        <p>An approved RCA becomes a drafted KB article automatically. The fourth store with the same EFTPOS fault
+           gets the first store's fix.</p></div></div>
+      <div class="ben"><div class="num">04</div><div><h4>Reactive becomes pre-emptive</h4>
+        <p>Recurrence, capacity breach dates and slow degradation are flagged with an evidence trail and a
+           recommendation, days before a threshold trips.</p></div></div>
+      <div class="ben"><div class="num">05</div><div><h4>Routine work leaves the queue</h4>
+        <p>Password and PIN resets resolve on the phone in a couple of minutes, verified against Entra — while
+           access requests still get the human approval they require.</p></div></div>
+      <div class="ben"><div class="num">06</div><div><h4>Auditable by construction</h4>
+        <p>One correlation ID and a signed, immutable run record per output — inputs, chunk versions, model and
+           prompt version, tool calls, critic verdict, human decision, outcome.</p></div></div>
+      <div class="ben"><div class="num">07</div><div><h4>Privacy risk removed, not managed</h4>
+        <p>The model never sees raw PII, and index-time redaction means even a successful prompt injection has
+           nothing to exfiltrate.</p></div></div>
+      <div class="ben"><div class="num">08</div><div><h4>Hallucination is a blocked state</h4>
+        <p>Ungrounded output is a handled error path, not a customer-facing surprise. That is what makes the
+           programme deployable in a regulated retail environment.</p></div></div>
+      <div class="ben"><div class="num">09</div><div><h4>One platform, seven agents</h4>
+        <p>Shared gateway, shared identity, shared grounding plane. Every additional agent is cheaper than the one
+           before it — no point-to-point integrations to unpick.</p></div></div>
+      <div class="ben"><div class="num">10</div><div><h4>Autonomy without a leap of faith</h4>
+        <p>Nothing gets more authority because it feels reliable. It gets more authority because the accuracy
+           numbers say so, per action type, reversibly.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><b>Coles IT Operations · Agentic AI Enablement</b>
+      Seven-agent programme · Microsoft AI Foundry · Endpoint spec v1.1</div>
+    <div style="text-align:right">Internal working document — July 2026<br>
+      Diagrams generated from the source files in <code>architecture/</code></div>
+  </div>
+</footer>
+
+<div class="lb" id="lb"><button class="x" onclick="closeLb()">✕</button><div class="inner" id="lbi"></div></div>
+
+<script>
+(function(){
+  // ── tabs ────────────────────────────────
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.addEventListener('click',function(){
+      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
+      document.querySelectorAll('.dpane').forEach(function(x){x.classList.remove('on')});
+      t.classList.add('on');
+      var p=document.getElementById(t.dataset.p);
+      if(p) p.classList.add('on');
+    });
+  });
+
+  // ── zoom: the ONLY thing JS changes is the zoomer's width % ──
+  var W=new WeakMap();
+  function setW(z,pct){pct=Math.max(25,Math.min(400,pct));W.set(z,pct);z.style.width=pct+'%';}
+  document.querySelectorAll('.viewer').forEach(function(v){
+    var stage=v.querySelector('.stage'); if(!stage) return;
+    var z=stage.querySelector('.zoomer'); if(!z) return;
+    v.querySelectorAll('.vb').forEach(function(b){
+      b.addEventListener('click',function(){
+        var a=b.dataset.z, cur=W.get(z)||100;
+        if(a==='+')       setW(z,cur*1.3);
+        else if(a==='-')  setW(z,cur/1.3);
+        else if(a==='fit')setW(z,100);
+        else if(a==='one'){
+          var g=z.querySelector('svg,img');
+          var nat=g&&g.viewBox&&g.viewBox.baseVal&&g.viewBox.baseVal.width
+                  ?g.viewBox.baseVal.width:(g?g.naturalWidth:0);
+          if(nat&&stage.clientWidth) setW(z, nat/stage.clientWidth*100);
+        }
+        else if(a==='full') openLb(z);
+      });
+    });
+    var down=false,sx,sy,sl,st;
+    stage.addEventListener('mousedown',function(e){
+      down=true;sx=e.pageX;sy=e.pageY;sl=stage.scrollLeft;st=stage.scrollTop;
+      stage.classList.add('drag')});
+    window.addEventListener('mouseup',function(){down=false;stage.classList.remove('drag')});
+    stage.addEventListener('mousemove',function(e){
+      if(!down)return;e.preventDefault();
+      stage.scrollLeft=sl-(e.pageX-sx);stage.scrollTop=st-(e.pageY-sy)});
+  });
+
+  // ── lightbox ───────────────────────────
+  window.openLb=function(z){
+    var g=z.querySelector('svg,img'); if(!g) return;
+    var i=document.getElementById('lbi'); i.innerHTML='';
+    var c=g.cloneNode(true);
+    var nat=(c.viewBox&&c.viewBox.baseVal&&c.viewBox.baseVal.width)||1400;
+    c.style.width=Math.max(nat,1400)+'px'; c.style.height='auto'; c.style.maxWidth='none';
+    i.appendChild(c);
+    document.getElementById('lb').classList.add('on');
+    document.body.style.overflow='hidden';
+  };
+  window.closeLb=function(){
+    document.getElementById('lb').classList.remove('on');
+    document.body.style.overflow='';
+  };
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')closeLb()});
+  document.getElementById('lb').addEventListener('click',function(e){if(e.target.id==='lb')closeLb()});
+
+  // ── scroll reveal, with a safety net so nothing can stay hidden ──
+  if('IntersectionObserver' in window){
+    var els=document.querySelectorAll('section .card, section .layer, section .ph, section .ben, section .prob, .quote, .tblwrap');
+    els.forEach(function(el){el.classList.add('reveal')});
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
+    },{threshold:.05,rootMargin:'0px 0px -30px 0px'});
+    els.forEach(function(el,i){el.style.transitionDelay=(i%4*55)+'ms';io.observe(el)});
+    setTimeout(function(){els.forEach(function(el){el.classList.add('in')})},3000);
+  }
+
+  document.querySelectorAll('nav.links a').forEach(function(a){
+    a.addEventListener('click',function(){document.querySelector('nav.links').classList.remove('open')})});
+})();
+</script>
+</body>
+</html>

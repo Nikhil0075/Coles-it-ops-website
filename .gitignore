@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Editor
+.vscode/
+.idea/
+
+# Scratch script — contains a real Azure AI Foundry endpoint hostname.
+# Keep it out of a public repo.
+try.py

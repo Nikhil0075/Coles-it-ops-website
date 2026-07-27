@@ -1,0 +1,58 @@
+name: Deploy site to GitHub Pages
+
+# Publishes ONLY index.html. The rest of the repo (specs, .docx deliverables,
+# mock ticket data, source diagrams) is deliberately NOT published — a Pages
+# site built from a private repo is still reachable by anyone with the URL
+# unless you are on GitHub Enterprise Cloud with an organisation account.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:        # lets you trigger a deploy manually from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once; don't cancel one that's mid-flight.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Stage only the site file
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          # stops Pages running the output through Jekyll
+          touch _site/.nojekyll
+          echo "Staged $(du -h _site/index.html | cut -f1) of site"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

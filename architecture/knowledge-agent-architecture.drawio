@@ -1,0 +1,196 @@
+<mxfile host="65bd71144e">
+    <diagram id="ka-arch" name="Knowledge Agent">
+        <mxGraphModel dx="1388" dy="670" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1500" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="KNOWLEDGE AGENT — Production Architecture (Microsoft Foundry / Azure) — P1 reason-only · P2 no raw PII to LLM · P3 no answer without evidence" style="text;html=1;fontSize=16;fontStyle=1;align=center;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="10" width="1400" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="cons" value="Consumers — Agent Assist · Conversational · Voice · RCA · DC Ops agents · Engineers · Knowledge Owners (Entra token + x-correlation-id on every call)" style="rounded=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="50" width="1480" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ingress" value="Ingress rail" style="rounded=1;fillColor=#D5E8D4;strokeColor=#82B366;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="140" width="1480" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="afd" value="Azure Front Door Premium + WAF&#xa;OWASP · bot protection · geo-fence AU" style="rounded=1;fillColor=#FFFFFF;strokeColor=#82B366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="175" width="280" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="appgw" value="Application Gateway WAF v2&#xa;regional L7 · zone-redundant · autoscale 2–10" style="rounded=1;fillColor=#FFFFFF;strokeColor=#82B366;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="175" width="300" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="apim" value="APIM Premium v2 — AI Gateway — route /agents/knowledge/v1&#xa;llm-token-limit · llm-semantic-cache (Managed Redis) · llm-content-safety shield-prompt=true · llm-emit-token-metric &#xa;· backend pool + circuit breaker · managed identity to Foundry (no model keys in apps)" style="rounded=1;fillColor=#FFFFFF;strokeColor=#82B366;fontSize=11;align=left;spacingLeft=8;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="175" width="780" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pii" value="DE-IDENTIFICATION TIER (mandatory — sits between every channel and every model call — the LLM is an untrusted third party)" style="rounded=1;fillColor=#F8CECC;strokeColor=#B85450;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="290" width="1480" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="pii1" value="Azure AI Language PII detect&#xa;Text / Conversation / Document&#xa;+ Coles custom regex recognisers" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="322" width="270" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pii2" value="Pseudonymiser&#xa;stable reversible tokens (PERSON_1, EMP_0042)&#xa;redact at confidence ≥ 0.5, fail closed" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="322" width="300" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pii3" value="Token Vault — isolated Cosmos DB account&#xa;CMK (Key Vault HSM) · TTL = ticket lifecycle&#xa;reachable only by app-tier managed identity, never the agent" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="322" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="pii4" value="Re-identify only at render time&#xa;UI swaps tokens back — Purview label + EXTRACT right + Entra group check" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1130" y="322" width="380" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ka" value="KNOWLEDGE AGENT — Foundry Agent Service (prompt agent · stateless · session-isolated · managed identity · built-in tracing) — reasons on pseudonyms only" style="rounded=1;fillColor=#FFE6CC;strokeColor=#D79B00;verticalAlign=top;fontStyle=1;fontSize=13;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="430" width="1480" height="440" as="geometry"/>
+                </mxCell>
+                <mxCell id="kaEp" value="REST endpoints (via APIM)&#xa;&#xa;POST /query — grounded Q&amp;A + citations&#xa;POST /search — raw hybrid retrieval&#xa;POST /ingest — controlled indexing&#xa;GET /freshness/report&#xa;GET /gaps&#xa;POST /articles/draft — KB draft PR&#xa;GET /health&#xa;&#xa;Autonomy: serve = auto (read-only)&#xa;curate = draft-PR only, human publishes" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;align=left;verticalAlign=top;spacingLeft=8;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="465" width="290" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="serve" value="SERVE LOOP — agentic retrieval (synchronous)" style="rounded=1;fillColor=#FFF2E6;strokeColor=#D79B00;verticalAlign=top;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="465" width="550" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="s1" value="1. Query Decomposer&#xa;small model · splits into sub-queries" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="495" width="245" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s2" value="2. Multi-Query Retriever&#xa;Foundry IQ toolbox · hybrid BM25+vector" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="685" y="495" width="245" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s3" value="3. Reranker&#xa;AI Search semantic ranker" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="545" width="245" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s4" value="4. Answer Synthesiser + Citation Builder&#xa;doc ID · section · version · last_updated" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="685" y="545" width="245" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="s5" value="5. GROUNDEDNESS CRITIC (paired critic config)&#xa;every claim must map to a retrieved chunk &#xa;— ungrounded output is BLOCKED (returns NOT_GROUNDED + handover), never surfaced with a caveat" style="rounded=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="595" width="510" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="" style="edgeStyle=none;html=1;" edge="1" parent="1" source="s6" target="kmem">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="s6" value="Below confidence/groundedness threshold → structured handover with full context (not &quot;sorry&quot;)" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="420" y="658" width="510" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="curate" value="CURATE LOOP — KB caretaker (asynchronous, scheduled + event-driven)" style="rounded=1;fillColor=#FFF2E6;strokeColor=#D79B00;verticalAlign=top;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="975" y="465" width="540" height="230" as="geometry"/>
+                </mxCell>
+                <mxCell id="c1" value="Freshness Checker&#xa;staleness scan vs source-of-truth" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="995" y="495" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c2" value="Duplicate / Conflict Detector&#xa;cross-index similarity + contradiction check" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1255" y="495" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c3" value="KB-Gap Detector&#xa;from unanswered queries + RCA outputs" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="995" y="545" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c4" value="Article Drafter&#xa;drafts from resolved incidents / approved RCAs" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1255" y="545" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="c5" value="Output = DRAFT PR against the KB → knowledge-owner review → merge triggers reindex.&#xa;NOTHING SELF-PUBLISHES (answer to the knowledge-quality risk)" style="rounded=1;fillColor=#F8CECC;strokeColor=#B85450;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="995" y="595" width="500" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="keval" value="Foundry evaluations + ASSERT (groundedness · relevance · safety) on production traces &#xa;· Agent Optimizer for regression-driven improvement" style="rounded=1;fillColor=#FFD9B3;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="955" y="715" width="560" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="kmem" value="Memory: Foundry session + procedural memory · BYO Cosmos DB thread state (pseudonyms only — index, cache, traces, evals all token-only)" style="rounded=1;fillColor=#FFD9B3;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="775" width="1430" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="kout" value="Output: schema-validated JSON — answer · citations[] (chunk IDs + versions) · confidence · critic verdict — signed run record to ADLS (immutable, legal hold)" style="rounded=1;fillColor=#FFFFFF;strokeColor=#D79B00;fontSize=10;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="822" width="1430" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="ground" value="Grounding &amp; ingestion plane" style="rounded=1;fillColor=#F5F5F5;strokeColor=#666666;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="900" width="1480" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="g1" value="Foundry IQ&#xa;SLA-backed retrieval endpoint&#xa;exposed to agents via Toolboxes" style="rounded=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="932" width="250" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="g2" value="Azure AI Search — hybrid + semantic ranker&#xa;one index per corpus: runbooks · SOPs · KEDB · RCA library · CMDB descriptions&#xa;security-trimmed by Entra group" style="rounded=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="355" y="932" width="380" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="g4" value="ADLS Gen2 — raw + redacted corpora · eval datasets · immutable trace archive" style="rounded=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="1002" width="440" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="g5" value="Azure Managed Redis — semantic cache (APIM) · session cache" style="rounded=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="545" y="1002" width="380" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="trust" value="Trust, identity &amp; observability (cross-cutting)" style="rounded=1;fillColor=#F8CECC;strokeColor=#B85450;verticalAlign=top;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1110" width="1480" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="t1" value="Entra Agent ID&#xa;agent = first-class principal · RBAC · Conditional Access&#xa; · OBO (never exceeds caller&#39;s entitlements)" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="1142" width="340" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="t2" value="Purview DSPM for AI&#xa;sensitivity labels + EXTRACT rights &#xa;· DLP on agent data access · unified AI audit log" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="445" y="1142" width="330" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="t3" value="Content Safety + Prompt Shields&#xa;at APIM AND inside Foundry guardrails &#xa;— defence in depth vs XPIA from retrieved docs" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="795" y="1142" width="340" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="t4" value="App Insights / Azure Monitor&#xa;OTel GenAI conventions &#xa;· one trace ID: channel→APIM→agent→tool→ITSM" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="1155" y="1142" width="360" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="net" value="Network: VNet + Private Endpoints on every PaaS service · Foundry BYO VNet, no public egress · NSGs + Azure Firewall outbound allow-list · Key Vault + managed identity everywhere, zero stored credentials" style="rounded=1;fillColor=#FFFFFF;strokeColor=#B85450;fontSize=10;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="1230" width="1480" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6C8EBF;" parent="1" source="cons" target="afd" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="800" y="130"/>
+                            <mxPoint x="230" y="130"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82B366;" parent="1" source="afd" target="appgw" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82B366;" parent="1" source="appgw" target="apim" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e4" value="pseudonymise inbound" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#B85450;fontSize=10;" parent="1" source="apim" target="pii" edge="1">
+                    <mxGeometry x="0.0027" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1120" y="270"/>
+                            <mxPoint x="800" y="270"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e5" value="tokens only" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#D79B00;fontSize=10;fontStyle=1;" parent="1" source="pii" target="ka" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e6" value="token↔value map" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#B85450;dashed=1;fontSize=10;" parent="1" source="pii2" target="pii3" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="retrieve (security-trimmed)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#666666;fontSize=10;" parent="1" source="s2" target="g1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="808" y="540"/>
+                            <mxPoint x="330" y="540"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#666666;" parent="1" source="g1" target="g2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e9" value="index" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#666666;fontSize=10;" parent="1" source="g3" target="g2" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e10" value="raw docs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#666666;fontSize=10;" parent="1" source="g4" target="g3" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="305" y="1070"/>
+                            <mxPoint x="1135" y="1070"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e11" value="events trigger ingest / curate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#D6B656;fontSize=10;" parent="1" source="g6" target="curate" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="g6" value="Event Grid: doc-repo change events → reindex&#xa;Service Bus topic knowledge.ingest: approved RCA → KB candidate" style="rounded=1;fillColor=#FFF2CC;strokeColor=#D6B656;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="945" y="1002" width="570" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="g3" value="Ingestion pipeline (Azure Functions + Document Intelligence / Content Understanding)&#xa;parse → chunk → PII-REDACT (index-time — injection cannot exfiltrate what was never indexed) → embed text-embedding-3-large → index" style="rounded=1;fillColor=#FFFFFF;strokeColor=#666666;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="755" y="932" width="760" height="55" as="geometry"/>
+                </mxCell>
+                <mxCell id="kmod" value="Models: large reasoning model for synthesis · mini/nano tier for decomposition/classification (model router selects per task) — Azure OpenAI via Foundry, PTU for interactive + PAYG spillover" style="rounded=1;fillColor=#FFD9B3;strokeColor=#D79B00;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="85" y="715" width="850" height="45" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
