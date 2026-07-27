@@ -8,6 +8,7 @@ Companion document to the two Whimsical architecture diagrams.
 | Knowledge Agent — Azure Architecture | https://whimsical.com/5xQdL3XX7LyV6TKudTQmNU |
 | Predictive Agent — Azure Architecture | https://whimsical.com/2AKCBwFyHWwoabyS3ZM8gt |
 | RCA Agent — Azure Architecture | https://whimsical.com/2bdQLKnukbUnYewenpPpeu |
+| Conversational Agent — Azure Architecture | https://whimsical.com/ASWBxR1juQ97d5yb4ChjfU |
 
 The diagrams are deliberately sparse — only the services that carry the design, with labeled directional flows and the trust boundaries that matter. Numbered arrows correspond to the numbered flow steps below; this document carries the full detail that is intentionally kept off the canvas.
 
@@ -152,6 +153,43 @@ The RCA Agent is the third agent on the same rail. Its distinguishing property i
 *Bing Search API is retired.* The v7 Bing Search APIs were retired on 11 August 2025 and legacy keys now return HTTP 410. The supported path is Grounding with Bing Search as a tool inside Foundry Agent Service. Two consequences: it is materially more expensive than the old API, and it only works from inside a Foundry agent — an external service cannot call it as a standalone tool. Also note Foundry Agents *classic* is deprecated with retirement announced for 31 March 2027, so target the current Foundry Agent Service, not the classic surface.
 
 *External web search is a data-egress decision.* The Research node is the only component in any of the three agents that sends text outside the Azure tenant boundary. It must sit behind the de-identification tier like every other model call, and the query itself should be constrained to product, vendor and error-signature terms — never incident narrative, never store or staff identifiers. This is worth an explicit control rather than an assumption.
+
+---
+
+## 6b. Conversational Agent — node graph and end-to-end flow
+
+The self-service front door. Its architectural job is **containment**: resolve what it can from grounded knowledge, capture what it can't as a well-formed ticket, and hand over cleanly when neither applies.
+
+**Node → Azure service mapping**
+
+| Node | Azure service | Role |
+|---|---|---|
+| Channels | Teams · web chat · self-service portal | Entry points; all traverse the same REST rail |
+| Session state | Cosmos DB | Multi-turn thread state; this is what makes `collect_more → END (wait)` work |
+| intent_detection | Azure OpenAI mini/nano tier | Cheap classifier; only the knowledge and ticket-summary branches ever invoke a reasoning model |
+| knowledge_retrieval / faq_response | Knowledge Agent `POST /query` (A2A via APIM) | Grounded answer with citations — no separate index for this agent |
+| issue_intake | Foundry Agent Service + Cosmos state | Slot filling across turns until required fields are complete |
+| ticket_summary | Azure OpenAI + Functions tool proxy → Service Bus → ITSM | Agent emits intent; the proxy writes the ticket (P1) |
+| greeting / general_chat | Templated or mini-tier model + Content Safety | Bounded small talk; no tool access |
+| exit | ADLS Gen2 | Session closed, transcript archived |
+
+**Flow**
+
+1–6. A user opens a channel; the request crosses Front Door + WAF, APIM AI Gateway and the de-identification tier before reaching the agent. Session state lands in Cosmos DB so the conversation can pause between turns.
+
+7–13. `intent_detection_node` classifies with a mini/nano model and routes to exactly one branch. Cost discipline lives here: a greeting must never cost a reasoning-model call.
+
+14–19. **Knowledge path** — `knowledge_retrieval_node` calls the Knowledge Agent over A2A; `faq_response_node` returns answer plus citations; the groundedness gate blocks anything unsourced and routes it to human handover. Greeting and general chat return directly. Exit archives the transcript.
+
+20–25. **Issue path** — `issue_intake_node` fills slots; if fields are missing the graph ends the turn and waits (session persists in Cosmos); once complete, `ticket_summary_node` produces the summary, the Functions tool proxy writes to ITSM via Service Bus, and the ticket reference returns to the user.
+
+**Two gaps in the supplied graph, both added to the diagram**
+
+*No fallback branch.* The original graph routes to five intents with no path for low-confidence classification. In production the classifier will be uncertain regularly, and with no fallback the agent either guesses a branch or dead-ends. A `fallback_node` routing to human handover is added — and its firing rate is a useful early quality signal.
+
+*No escalation path.* Every branch in the original terminates at END. A conversational agent facing colleagues needs a warm-transfer route that carries the conversation context with it, otherwise the user re-explains everything to a human and the agent has produced negative value. The groundedness gate and the fallback node both feed it.
+
+The metric that matters for this agent is **containment rate against handover rate** — resolved without a human, versus escalated. Tracked in Foundry evaluations alongside the usual groundedness checks.
 
 ---
 
