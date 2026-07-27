@@ -480,9 +480,9 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
   <div class="wrap">
     <p class="eyebrow">Architecture diagrams</p>
     <h2>The full picture</h2>
-    <p class="lede">One diagram per agent, plus the combined platform overview. Drag to pan, zoom with the controls,
-      or open full screen. A green dot means the diagram is in; a grey dot means the slot is reserved and waiting
-      for the file.</p>
+    <p class="lede"><b>__DIAGRAM_COUNT__ diagrams are available — click a tab below to switch between them.</b>
+      Drag to pan, zoom with the controls, or open full screen. A green dot means the diagram is in; a grey dot
+      means the slot is reserved and waiting for the file.</p>
 
     <div class="tabs">__DIAGRAM_TABS__</div>
     __DIAGRAM_PANES__
@@ -696,13 +696,7 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
     <p class="muted small" style="margin:0 0 20px">Where each agent currently sits.</p>
     <div class="tblwrap"><table class="tbl">
       <tr><th>Agent</th><th>Phase</th><th>Detailed spec</th><th>Endpoints defined</th><th>Diagram</th><th>Autonomy today</th></tr>
-      <tr><td>Knowledge</td><td>1–2</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>Advisory / draft-only</td></tr>
-      <tr><td>Predictive</td><td>2</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td>Advisory (level 1, all actions)</td></tr>
-      <tr><td>Agent Assist</td><td>1</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Suggest</td></tr>
-      <tr><td>Voice</td><td>2</td><td class="yes">✓ policy</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Auto-execute, closed set</td></tr>
-      <tr><td>Conversational</td><td>2</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Advisory</td></tr>
-      <tr><td>RCA</td><td>3</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Draft only</td></tr>
-      <tr><td>DC Ops</td><td>3</td><td class="no">—</td><td class="yes">✓ consumer</td><td class="no">pending</td><td>Advisory</td></tr>
+      __COVERAGE_ROWS__
     </table></div>
   </div>
 </section>

@@ -13,6 +13,8 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'site/**'            # template or build script changed
+      - 'architecture/**'    # a diagram was added or replaced
       - '.github/workflows/deploy.yml'
   workflow_dispatch:        # lets you trigger a deploy manually from the Actions tab
 
@@ -32,6 +34,17 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Rebuild index.html from the template and diagrams
+        # Deliberately rebuilt here rather than trusting the committed index.html —
+        # otherwise adding a diagram to architecture/ silently does nothing until
+        # someone remembers to run the build locally.
+        run: python3 site/build_site.py
 
       - name: Stage only the site file
         run: |

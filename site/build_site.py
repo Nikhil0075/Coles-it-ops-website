@@ -40,6 +40,24 @@ DIAGRAMS = [
      'DC playbook lookup, capacity forecasting, prediction outcome feedback'),
 ]
 
+# Coverage table rows. The Diagram column is filled in from the files actually
+# present, so the table can never contradict the diagram viewer.
+# (agent, slug, phase, detailed spec, endpoints, autonomy today)
+COVERAGE = [
+    ('Knowledge', 'knowledge-agent-architecture', '1–2', 'yes', 'yes',
+     'Advisory / draft-only'),
+    ('Predictive', 'predictive-agent-architecture', '2', 'yes', 'yes',
+     'Advisory (level 1, all actions)'),
+    ('Agent Assist', 'agent-assist-architecture', '1', '—', '✓ consumer',
+     'Suggest'),
+    ('Voice', 'voice-agent-architecture', '2', '✓ policy', '✓ consumer',
+     'Auto-execute, closed set'),
+    ('Conversational', 'conversational-agent-architecture', '2', '—', '✓ consumer',
+     'Advisory'),
+    ('RCA', 'rca-agent-architecture', '3', '—', '✓ consumer', 'Draft only'),
+    ('DC Ops', 'dcops-agent-architecture', '3', '—', '✓ consumer', 'Advisory'),
+]
+
 EXTS = ('.png', '.svg', '.jpg', '.jpeg')
 
 
@@ -116,10 +134,27 @@ def main():
             f'<div class="vbar"><span class="t">{caption}</span>{controls}</div>'
             f'{body}</div></div>')
 
+    # coverage table — Diagram column derived from the files on disk
+    def cell(v):
+        if v == 'yes':
+            return '<td class="yes">✓</td>'
+        if v == 'no':
+            return '<td class="no">pending</td>'
+        cls = ' class="yes"' if v.startswith('✓') else ' class="no"'
+        return f'<td{cls}>{v}</td>'
+
+    rows = []
+    for agent, slug, phase, spec, eps, autonomy in COVERAGE:
+        has = 'yes' if find(slug)[0] else 'no'
+        rows.append(f'<tr><td>{agent}</td><td>{phase}</td>{cell(spec)}{cell(eps)}'
+                    f'{cell(has)}<td>{autonomy}</td></tr>')
+
     html = open(os.path.join(ROOT, 'site', 'template.html'), encoding='utf-8').read()
     html = html.replace('__DIAGRAM_TABS__', '\n      '.join(tabs))
     html = html.replace('__DIAGRAM_PANES__', '\n    '.join(panes))
-    assert '__DIAGRAM' not in html, 'unreplaced placeholder'
+    html = html.replace('__COVERAGE_ROWS__', '\n      '.join(rows))
+    html = html.replace('__DIAGRAM_COUNT__', f'{found} of {len(DIAGRAMS)}')
+    assert '__DIAGRAM' not in html and '__COVERAGE' not in html, 'unreplaced placeholder'
 
     out = os.path.join(ROOT, 'index.html')
     open(out, 'w', encoding='utf-8').write(html)
