@@ -155,10 +155,51 @@ nav.links a:hover{color:var(--ink)}
 .stage.drag{cursor:grabbing}
 .zoomer{width:100%}                 /* JS only ever changes this width */
 .zoomer svg,.zoomer img{display:block;width:100%;height:auto}
-.dpane{display:none} .dpane.on{display:block}
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;font-size:12.5px;color:var(--slate)}
 .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;
   vertical-align:-1px;border:1px solid rgba(0,0,0,.12)}
+
+/* ── carousel — native horizontal scroll-snap, overlap layered on top ──
+   Works with zero JS: it degrades to an ordinary swipeable row.
+   JS adds scale/opacity/z-index based on distance from centre.        */
+.carousel{position:relative;margin:0 -28px}      /* bleed to the viewport edge */
+.ctrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;padding:26px 0 30px;
+  scrollbar-width:none;-ms-overflow-style:none}
+.ctrack::-webkit-scrollbar{display:none}
+.cslide{flex:0 0 auto;scroll-snap-align:center;transition:transform .45s cubic-bezier(.22,.8,.3,1),
+  opacity .45s ease;transform-origin:center center;position:relative}
+/* first & last get spacers so edge slides can still centre */
+.ctrack:before,.ctrack:after{content:"";flex:0 0 var(--pad);}
+
+/* agents: narrow cards, strong overlap */
+.carousel.agents{--pad:max(28px,calc(50% - 215px))}
+.carousel.agents .cslide{width:430px;margin-right:-46px}
+/* diagrams: wide panels, gentle overlap */
+.carousel.diagrams{--pad:max(28px,calc(50% - 540px))}
+.carousel.diagrams .cslide{width:min(1080px,88vw);margin-right:-40px}
+@media(max-width:760px){
+  .carousel.agents{--pad:20px} .carousel.agents .cslide{width:86vw;margin-right:-24px}
+  .carousel.diagrams{--pad:16px} .carousel.diagrams .cslide{width:92vw;margin-right:-20px}
+}
+.cslide>*{height:100%}
+/* arrows */
+.cnav{position:absolute;top:50%;transform:translateY(-50%);z-index:20;
+  width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:#fff;
+  color:var(--ink);font-size:20px;line-height:1;cursor:pointer;
+  box-shadow:0 6px 22px rgba(12,18,32,.14);transition:.18s;font-family:var(--f)}
+.cnav:hover{background:var(--ink);color:#fff;border-color:var(--ink);transform:translateY(-50%) scale(1.07)}
+.cnav[disabled]{opacity:0;pointer-events:none}
+.cnav.prev{left:14px} .cnav.next{right:14px}
+@media(max-width:760px){.cnav{display:none}}
+/* dots */
+.cdots{display:flex;gap:8px;justify-content:center;margin-top:4px}
+.cdot{width:8px;height:8px;padding:0;border-radius:50%;border:0;cursor:pointer;
+  background:#CBD3E0;transition:.2s}
+.cdot.on{background:var(--red);width:26px;border-radius:5px}
+.cdot:hover{background:#9FAABC}
+.cdot.on:hover{background:var(--red)}
+.chint{text-align:center;font-size:12.5px;color:var(--slate);margin:2px 0 0}
 .pending{padding:56px 34px;text-align:center;background:
   repeating-linear-gradient(135deg,#FBFCFE,#FBFCFE 10px,#F5F7FB 10px,#F5F7FB 20px)}
 .pending .badge{display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.09em;
@@ -209,32 +250,38 @@ nav.links a:hover{color:var(--ink)}
 .yes{color:var(--green);font-weight:700} .no{color:#B9C4D4;font-weight:700}
 .tblwrap{overflow-x:auto}
 
-/* ── phases ────────────────────────────── */
-.phases{background:var(--ink);color:#fff}
-.phases h2{color:#fff} .phases .lede{color:#96A3BB}
-.ph{position:relative;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.11);
+/* ── phases ──────────────────────────────
+   Lifted off near-black: every text tone below clears WCAG AA on this bg. */
+.phases{background:linear-gradient(165deg,#18213A 0%,#1F2A47 52%,#18213A 100%);color:#fff}
+.phases h2{color:#fff} .phases .lede{color:#BCC8DE}
+.phases .eyebrow{color:#FF9298}
+.ph{position:relative;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.20);
   border-radius:18px;padding:30px 26px;transition:.2s;overflow:hidden}
-.ph:hover{background:rgba(255,255,255,.075);transform:translateY(-4px)}
+.ph:hover{background:rgba(255,255,255,.15);transform:translateY(-4px)}
 .ph:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--c)}
 .ph .n{font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--c)}
-.ph h3{font-size:21px;margin:9px 0 6px}
-.ph .sub{font-size:13px;color:#8E9CB6;margin:0 0 14px}
+.ph h3{font-size:21px;margin:9px 0 6px;color:#fff}
+.ph .sub{font-size:13.5px;color:#B9C6DC;margin:0 0 14px}
 .ph .who{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .ph .who span{font-size:11.5px;font-weight:650;padding:4px 9px;border-radius:6px;
-  background:rgba(255,255,255,.1);color:#D3DCEB}
+  background:rgba(255,255,255,.18);color:#EAF0FA}
 .ph ul{margin:0;padding:0;list-style:none}
-.ph li{font-size:14px;color:#C3CDDF;padding:8px 0 8px 24px;position:relative;
-  border-top:1px solid rgba(255,255,255,.07)}
+.ph li{font-size:14px;color:#DCE4F1;padding:8px 0 8px 24px;position:relative;
+  border-top:1px solid rgba(255,255,255,.13)}
 .ph li:first-child{border:0}
+.ph li b{color:#fff}
+.ph li code,.phases code{background:rgba(255,255,255,.16);color:#F0D9DB}
 .ph li:before{content:"";position:absolute;left:2px;top:15px;width:7px;height:7px;
-  border-radius:50%;background:var(--c);opacity:.85}
+  border-radius:50%;background:var(--c)}
 .ladder{display:flex;margin-top:44px;border-radius:14px;overflow:hidden;
-  border:1px solid rgba(255,255,255,.12)}
+  border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06)}
 .ladder div{flex:1;padding:16px 18px;font-size:13.5px;font-weight:600;
-  border-right:1px solid rgba(255,255,255,.12);color:#B7C3D8}
+  border-right:1px solid rgba(255,255,255,.18);color:#E2E9F5}
 .ladder div:last-child{border:0}
-.ladder div small{display:block;font-weight:500;font-size:11.5px;color:#7E8DA8;margin-top:3px}
-.ladder div.now{background:rgba(224,26,34,.18);color:#fff}
+.ladder div small{display:block;font-weight:500;font-size:11.5px;color:#B4C1D8;margin-top:3px}
+.ladder div.now{background:rgba(224,26,34,.34);color:#fff}
+.ladder div.now small{color:#FFD6D8}
+.phases .small{color:#B9C6DC!important}
 @media(max-width:760px){.ladder{flex-direction:column}
   .ladder div{border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}}
 
@@ -485,7 +532,16 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
       means the slot is reserved and waiting for the file.</p>
 
     <div class="tabs">__DIAGRAM_TABS__</div>
+
+    <div class="carousel diagrams" data-carousel data-start="__DIAGRAM_START__">
+      <button class="cnav prev" aria-label="Previous diagram">‹</button>
+      <div class="ctrack">
     __DIAGRAM_PANES__
+      </div>
+      <button class="cnav next" aria-label="Next diagram">›</button>
+    </div>
+    <div class="cdots">__DIAGRAM_DOTS__</div>
+    <p class="chint">Swipe, scroll sideways, or use the arrows · click a tab above to jump</p>
 
     <div class="legend">
       <span><i style="background:#1AA179;border-radius:50%"></i>Numbered badge — order of the flow</span>
@@ -504,16 +560,85 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
   <div class="wrap">
     <p class="eyebrow">The seven agents</p>
     <h2>What each one does</h2>
-    <p class="lede">All seven expose or consume REST APIs at <code>https://api.coles-itops.internal</code>.
-      Knowledge and Predictive are designed in full detail; the other five are specified at capability level and
-      run on the same rail.</p>
+    <p class="lede">Two of them answer; five of them ask. <b>Knowledge</b> and <b>Predictive</b> expose the APIs —
+      every other agent is a consumer, reaching them across the same gateway, with the same identity and the same
+      guardrails. That's the whole point of the shared rail: adding an agent means adding a caller, not an
+      integration.</p>
 
-    <div class="grid g2">
+    <div class="carousel agents" data-carousel data-start="0">
+      <button class="cnav prev" aria-label="Previous agent">‹</button>
+      <div class="ctrack">
 
-      <!-- Knowledge -->
-      <div class="agent c-knowledge">
+      <!-- ══ 01 Agent Assist ══ -->
+      <div class="cslide"><div class="agent c-assist">
         <div class="top">
-          <div class="row"><span class="tag wtag">Agent 01</span><span class="tag wtag">Foundry prompt agent</span>
+          <div class="row"><span class="tag wtag">Agent 01</span><span class="tag wtag">Phase 1</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>Agent Assist</h3>
+          <p>The engineer's co-pilot inside the ITSM console. It suggests; the human acts.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Sits beside the ticket. On open it pulls the relevant runbook steps and
+            similar past incidents, so the engineer starts from the best-known answer instead of a search box.</span></div>
+          <div class="kv"><b>How</b><span>Calls Knowledge <code>POST /query</code> with the ticket's context —
+            ticket ID, affected system, store ID — and renders the answer with its citations inline.</span></div>
+          <div class="kv"><b>Autonomy</b><span>Suggest only. It never updates or resolves a ticket by itself; it
+            pre-fills and the engineer confirms.</span></div>
+          <div class="kv"><b>Why first</b><span>Highest-value, lowest-risk consumer of the Knowledge Agent — and the
+            fastest way to prove groundedness in front of real engineers.</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
+            <span class="ep out">knowledge <b>POST</b> /query</span></div>
+        </div>
+      </div></div>
+
+      <!-- ══ 02 Conversational ══ -->
+      <div class="cslide"><div class="agent c-conv">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 02</span><span class="tag wtag">Phase 2</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>Conversational Agent</h3>
+          <p>Self-service in Teams and the support portal — for the questions that never needed a ticket.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Answers store and support staff directly, with source links, deflecting
+            the routine questions that currently arrive as tickets.</span></div>
+          <div class="kv"><b>How</b><span>Same <code>POST /query</code> route, same groundedness critic, same
+            security trimming — a user only ever retrieves what their own Entra groups permit.</span></div>
+          <div class="kv"><b>Failure mode</b><span>Where it can't ground an answer it says so and raises a ticket
+            with the full context attached, rather than improvising. Those unanswered questions feed the Knowledge
+            Agent's gap backlog.</span></div>
+          <div class="kv"><b>Autonomy</b><span>Advisory. It answers, and it can log a ticket; it changes nothing
+            else.</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
+            <span class="ep out">knowledge <b>POST</b> /query</span></div>
+        </div>
+      </div></div>
+
+      <!-- ══ 03 RCA ══ -->
+      <div class="cslide"><div class="agent c-rca">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 03</span><span class="tag wtag">Phase 3</span>
+            <span class="tag wtag">Capability level</span></div>
+          <h3>RCA Agent</h3>
+          <p>Assembles the evidence for root-cause analysis — and closes the loop back into knowledge.</p></div>
+        <div class="body">
+          <div class="kv"><b>Role</b><span>Gathers timeline, telemetry, change records and prior similar incidents
+            into a drafted root-cause analysis for a human to challenge and approve.</span></div>
+          <div class="kv"><b>How</b><span>Calls Knowledge <code>POST /search</code> for raw ranked passages rather
+            than a synthesised answer — it does its own reasoning over the evidence.</span></div>
+          <div class="kv"><b>The loop</b><span>On approval it publishes to the Service Bus topic
+            <code>knowledge.ingest</code>, turning the RCA into a KB candidate. <b>This is the mechanism that makes
+            knowledge compound</b> instead of decay.</span></div>
+          <div class="kv"><b>Autonomy</b><span>Draft only. No RCA is published, and no article created, without a
+            named human approving it.</span></div>
+          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls / publishes</span><br>
+            <span class="ep out">knowledge <b>POST</b> /search</span>
+            <span class="ep out">sb <b>topic</b> knowledge.ingest</span></div>
+        </div>
+      </div></div>
+
+      <!-- ══ 04 Knowledge ══ -->
+      <div class="cslide"><div class="agent c-knowledge">
+        <div class="top">
+          <div class="row"><span class="tag wtag">Agent 04</span><span class="tag wtag">Foundry prompt agent</span>
             <span class="tag wtag">Detailed design ✓</span></div>
           <h3>Knowledge Agent</h3>
           <p>Grounded answers from runbooks, SOPs and previous incidents — or an explicit block.</p></div>
@@ -532,12 +657,12 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
             <span class="ep"><b>GET</b> /gaps</span><span class="ep"><b>POST</b> /articles/draft</span>
             <span class="ep"><b>GET</b> /health</span></div>
         </div>
-      </div>
+      </div></div>
 
-      <!-- Predictive -->
-      <div class="agent c-predictive">
+      <!-- ══ 05 Predictive ══ -->
+      <div class="cslide"><div class="agent c-predictive">
         <div class="top">
-          <div class="row"><span class="tag wtag">Agent 02</span><span class="tag wtag">Hosted container agent</span>
+          <div class="row"><span class="tag wtag">Agent 05</span><span class="tag wtag">Hosted container agent</span>
             <span class="tag wtag">Detailed design ✓</span></div>
           <h3>Predictive Agent</h3>
           <p>Operational trends and early risk warnings. Advisory only — zero write authority.</p></div>
@@ -558,33 +683,36 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
             <span class="ep"><b>POST</b> /forecast</span><span class="ep"><b>POST</b> /trends/analyze</span>
             <span class="ep"><b>POST</b> /feedback</span><span class="ep"><b>GET</b> /health</span></div>
         </div>
-      </div>
+      </div></div>
 
-      <!-- Agent Assist -->
-      <div class="agent c-assist">
+      <!-- ══ 06 DC Ops ══ -->
+      <div class="cslide"><div class="agent c-dcops">
         <div class="top">
-          <div class="row"><span class="tag wtag">Agent 03</span><span class="tag wtag">Phase 1</span>
+          <div class="row"><span class="tag wtag">Agent 06</span><span class="tag wtag">Phase 3</span>
             <span class="tag wtag">Capability level</span></div>
-          <h3>Agent Assist</h3>
-          <p>The engineer's co-pilot inside the ITSM console. It suggests; the human acts.</p></div>
+          <h3>DC Ops Agent</h3>
+          <p>Distribution centre and data centre operations — where prediction meets the floor.</p></div>
         <div class="body">
-          <div class="kv"><b>Role</b><span>Sits beside the ticket. On open it pulls the relevant runbook steps and
-            similar past incidents, so the engineer starts from the best-known answer instead of a search box.</span></div>
-          <div class="kv"><b>How</b><span>Calls Knowledge <code>POST /query</code> with the ticket's context —
-            ticket ID, affected system, store ID — and renders the answer with its citations inline.</span></div>
-          <div class="kv"><b>Autonomy</b><span>Suggest only. It never updates or resolves a ticket by itself; it
-            pre-fills and the engineer confirms.</span></div>
-          <div class="kv"><b>Why first</b><span>Highest-value, lowest-risk consumer of the Knowledge Agent — and the
-            fastest way to prove groundedness in front of real engineers.</span></div>
+          <div class="kv"><b>Role</b><span>Playbook lookup for DC incidents, capacity checks before they bite, and
+            confirmation of whether a predicted risk actually materialised.</span></div>
+          <div class="kv"><b>Knowledge</b><span>Calls <code>POST /query</code> for the relevant playbook or runbook,
+            cited.</span></div>
+          <div class="kv"><b>Predictive</b><span>Calls <code>POST /forecast</code> for capacity and breach-date
+            projections, and <code>POST /feedback</code> to record the outcome — confirmed, false alarm or
+            prevented.</span></div>
+          <div class="kv"><b>Why it matters</b><span>It supplies ground truth. Prediction accuracy is the evidence
+            that justifies promoting any agent up the autonomy ladder (P5).</span></div>
           <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
-            <span class="ep out">knowledge <b>POST</b> /query</span></div>
+            <span class="ep out">knowledge <b>POST</b> /query</span>
+            <span class="ep out">predictive <b>POST</b> /forecast</span>
+            <span class="ep out">predictive <b>POST</b> /feedback</span></div>
         </div>
-      </div>
+      </div></div>
 
-      <!-- Voice -->
-      <div class="agent c-voice">
+      <!-- ══ 07 Voice ══ -->
+      <div class="cslide"><div class="agent c-voice">
         <div class="top">
-          <div class="row"><span class="tag wtag">Agent 04</span><span class="tag wtag">Phase 2</span>
+          <div class="row"><span class="tag wtag">Agent 07</span><span class="tag wtag">Phase 2</span>
             <span class="tag wtag">Policy defined ✓</span></div>
           <h3>Voice Agent</h3>
           <p>The phone line for stores. Identity is verified deterministically, before the model ever speaks.</p></div>
@@ -604,78 +732,13 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
           <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
             <span class="ep out">knowledge <b>POST</b> /query</span></div>
         </div>
-      </div>
+      </div></div>
 
-      <!-- Conversational -->
-      <div class="agent c-conv">
-        <div class="top">
-          <div class="row"><span class="tag wtag">Agent 05</span><span class="tag wtag">Phase 2</span>
-            <span class="tag wtag">Capability level</span></div>
-          <h3>Conversational Agent</h3>
-          <p>Self-service in Teams and the support portal — for the questions that never needed a ticket.</p></div>
-        <div class="body">
-          <div class="kv"><b>Role</b><span>Answers store and support staff directly, with source links, deflecting
-            the routine questions that currently arrive as tickets.</span></div>
-          <div class="kv"><b>How</b><span>Same <code>POST /query</code> route, same groundedness critic, same
-            security trimming — a user only ever retrieves what their own Entra groups permit.</span></div>
-          <div class="kv"><b>Failure mode</b><span>Where it can't ground an answer it says so and raises a ticket
-            with the full context attached, rather than improvising. Those unanswered questions feed the Knowledge
-            Agent's gap backlog.</span></div>
-          <div class="kv"><b>Autonomy</b><span>Advisory. It answers, and it can log a ticket; it changes nothing
-            else.</span></div>
-          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
-            <span class="ep out">knowledge <b>POST</b> /query</span></div>
-        </div>
       </div>
-
-      <!-- RCA -->
-      <div class="agent c-rca">
-        <div class="top">
-          <div class="row"><span class="tag wtag">Agent 06</span><span class="tag wtag">Phase 3</span>
-            <span class="tag wtag">Capability level</span></div>
-          <h3>RCA Agent</h3>
-          <p>Assembles the evidence for root-cause analysis — and closes the loop back into knowledge.</p></div>
-        <div class="body">
-          <div class="kv"><b>Role</b><span>Gathers timeline, telemetry, change records and prior similar incidents
-            into a drafted root-cause analysis for a human to challenge and approve.</span></div>
-          <div class="kv"><b>How</b><span>Calls Knowledge <code>POST /search</code> for raw ranked passages rather
-            than a synthesised answer — it does its own reasoning over the evidence.</span></div>
-          <div class="kv"><b>The loop</b><span>On approval it publishes to the Service Bus topic
-            <code>knowledge.ingest</code>, turning the RCA into a KB candidate. <b>This is the mechanism that makes
-            knowledge compound</b> instead of decay.</span></div>
-          <div class="kv"><b>Autonomy</b><span>Draft only. No RCA is published, and no article created, without a
-            named human approving it.</span></div>
-          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls / publishes</span><br>
-            <span class="ep out">knowledge <b>POST</b> /search</span>
-            <span class="ep out">sb <b>topic</b> knowledge.ingest</span></div>
-        </div>
-      </div>
-
-      <!-- DC Ops -->
-      <div class="agent c-dcops">
-        <div class="top">
-          <div class="row"><span class="tag wtag">Agent 07</span><span class="tag wtag">Phase 3</span>
-            <span class="tag wtag">Capability level</span></div>
-          <h3>DC Ops Agent</h3>
-          <p>Distribution centre and data centre operations — where prediction meets the floor.</p></div>
-        <div class="body">
-          <div class="kv"><b>Role</b><span>Playbook lookup for DC incidents, capacity checks before they bite, and
-            confirmation of whether a predicted risk actually materialised.</span></div>
-          <div class="kv"><b>Knowledge</b><span>Calls <code>POST /query</code> for the relevant playbook or runbook,
-            cited.</span></div>
-          <div class="kv"><b>Predictive</b><span>Calls <code>POST /forecast</code> for capacity and breach-date
-            projections, and <code>POST /feedback</code> to record the outcome — confirmed, false alarm or
-            prevented.</span></div>
-          <div class="kv"><b>Why it matters</b><span>It supplies ground truth. Prediction accuracy is the evidence
-            that justifies promoting any agent up the autonomy ladder (P5).</span></div>
-          <div class="eps"><span class="tag" style="margin-bottom:8px">Calls</span><br>
-            <span class="ep out">knowledge <b>POST</b> /query</span>
-            <span class="ep out">predictive <b>POST</b> /forecast</span>
-            <span class="ep out">predictive <b>POST</b> /feedback</span></div>
-        </div>
-      </div>
-
+      <button class="cnav next" aria-label="Next agent">›</button>
     </div>
+    <div class="cdots" id="agentDots"></div>
+    <p class="chint">Swipe, scroll sideways, or use the arrows</p>
 
     <div class="card" style="margin-top:26px;background:var(--bg-2)">
       <span class="tag red">Worked example — all the way through</span>
@@ -760,7 +823,7 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
       <div>3 · Approve &amp; execute<small>Agent acts after explicit approval</small></div>
       <div>4 · Auto-execute<small>Narrow, well-evidenced action types only</small></div>
     </div>
-    <p class="small" style="color:#7E8DA8;margin-top:14px">Autonomy is configured per action type, never per agent.
+    <p class="small" style="margin-top:14px">Autonomy is configured per action type, never per agent.
       The Voice Agent already auto-executes three specific low-risk actions while staying advisory for everything
       else — that is the model, and every promotion has to be justified by measured evaluation results.</p>
   </div>
@@ -821,15 +884,80 @@ footer b{color:#fff;display:block;font-size:15px;margin-bottom:4px;letter-spacin
 
 <script>
 (function(){
-  // ── tabs ────────────────────────────────
-  document.querySelectorAll('.tab').forEach(function(t){
-    t.addEventListener('click',function(){
-      document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
-      document.querySelectorAll('.dpane').forEach(function(x){x.classList.remove('on')});
-      t.classList.add('on');
-      var p=document.getElementById(t.dataset.p);
-      if(p) p.classList.add('on');
-    });
+  // ── carousels ───────────────────────────
+  // Baseline (no JS): .ctrack is an ordinary scroll-snap row and everything is
+  // readable. This only adds the overlap depth effect, arrows and dots.
+  document.querySelectorAll('[data-carousel]').forEach(function(car){
+    var track=car.querySelector('.ctrack');
+    var slides=[].slice.call(track.querySelectorAll('.cslide'));
+    if(!slides.length) return;
+    var prev=car.querySelector('.cnav.prev'), next=car.querySelector('.cnav.next');
+    // dots: the diagrams carousel ships its own (with labels); agents gets them built here
+    var dots=car.parentNode.querySelector('.cdots');
+    if(dots && !dots.children.length){
+      slides.forEach(function(_,i){
+        var b=document.createElement('button');
+        b.className='cdot'+(i===0?' on':''); b.dataset.go=i;
+        b.setAttribute('aria-label','Go to '+(i+1));
+        dots.appendChild(b);
+      });
+    }
+    var dotEls=dots?[].slice.call(dots.querySelectorAll('.cdot')):[];
+    // scoped to this carousel's own section — a global lookup would wire the
+    // agents carousel to the diagram tabs
+    var tabEls=[].slice.call(car.parentNode.querySelectorAll('.tab[data-go]'));
+
+    function centreOf(el){return el.offsetLeft + el.offsetWidth/2}
+    function active(){
+      var mid=track.scrollLeft + track.clientWidth/2, best=0, bd=Infinity;
+      slides.forEach(function(s,i){
+        var d=Math.abs(centreOf(s)-mid);
+        if(d<bd){bd=d;best=i}
+      });
+      return best;
+    }
+    // depth effect: distance from centre drives scale, fade and stacking
+    function paint(){
+      var mid=track.scrollLeft + track.clientWidth/2;
+      var w=slides[0].offsetWidth||1;
+      slides.forEach(function(s){
+        var d=Math.min(Math.abs(centreOf(s)-mid)/w, 2);
+        s.style.transform='scale('+(1-d*0.10).toFixed(3)+')';
+        s.style.opacity=(1-d*0.42).toFixed(3);
+        s.style.zIndex=String(100-Math.round(d*10));
+      });
+      var a=active();
+      dotEls.forEach(function(d,i){d.classList.toggle('on',i===a)});
+      tabEls.forEach(function(t,i){t.classList.toggle('on',i===a)});
+      if(prev) prev.disabled = track.scrollLeft<=2;
+      if(next) next.disabled = track.scrollLeft >= track.scrollWidth-track.clientWidth-2;
+    }
+    function go(i){
+      i=Math.max(0,Math.min(slides.length-1,i));
+      var s=slides[i];
+      track.scrollTo({left:centreOf(s)-track.clientWidth/2, behavior:'smooth'});
+    }
+    if(prev) prev.addEventListener('click',function(){go(active()-1)});
+    if(next) next.addEventListener('click',function(){go(active()+1)});
+    dotEls.forEach(function(d){d.addEventListener('click',function(){go(+d.dataset.go)})});
+    tabEls.forEach(function(t){t.addEventListener('click',function(){go(+t.dataset.go)})});
+
+    var tick;
+    track.addEventListener('scroll',function(){
+      if(tick) return;
+      tick=requestAnimationFrame(function(){tick=null;paint()});
+    },{passive:true});
+    window.addEventListener('resize',function(){clearTimeout(car._t);car._t=setTimeout(paint,150)});
+
+    // jump to the starting slide without animating on first paint
+    var start=parseInt(car.dataset.start||'0',10)||0;
+    function init(){
+      var s=slides[start];
+      if(s) track.scrollLeft=centreOf(s)-track.clientWidth/2;
+      paint();
+    }
+    init();
+    window.addEventListener('load',init);
   });
 
   // ── zoom: the ONLY thing JS changes is the zoomer's width % ──

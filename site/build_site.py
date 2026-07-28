@@ -21,41 +21,43 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ARCH = os.path.join(ROOT, 'architecture')
 
 # (tab label, file slug, caption shown in the viewer bar)
+# Agent order is fixed here and must match the order of the agent cards in
+# site/template.html. Combined overview sits first because it isn't an agent.
 DIAGRAMS = [
     ('Combined overview', 'knowledge-predictive-architecture',
      'All agents on the shared platform layer — ingress, PII tier, grounding, trust rail'),
-    ('Knowledge Agent', 'knowledge-agent-architecture',
-     'Ingress, de-identification tier, serve &amp; curate loops, groundedness critic, ingestion'),
-    ('Predictive Agent', 'predictive-agent-architecture',
-     'Signal sources, classical ML plane, Durable Functions, tool set, delivery'),
     ('Agent Assist', 'agent-assist-architecture',
      'ITSM console integration, ticket-context query, citation rendering'),
-    ('Voice Agent', 'voice-agent-architecture',
-     'ACS voice channel, deterministic identity verification, closed-set action policy'),
     ('Conversational Agent', 'conversational-agent-architecture',
      'Teams / portal self-service, grounded answers with source links, ticket fallback'),
     ('RCA Agent', 'rca-agent-architecture',
      'Evidence gathering, timeline &amp; change correlation, approved RCA → knowledge.ingest'),
+    ('Knowledge Agent', 'knowledge-agent-architecture',
+     'Ingress, de-identification tier, serve &amp; curate loops, groundedness critic, ingestion'),
+    ('Predictive Agent', 'predictive-agent-architecture',
+     'Signal sources, classical ML plane, Durable Functions, tool set, delivery'),
     ('DC Ops Agent', 'dcops-agent-architecture',
      'DC playbook lookup, capacity forecasting, prediction outcome feedback'),
+    ('Voice Agent', 'voice-agent-architecture',
+     'ACS voice channel, deterministic identity verification, closed-set action policy'),
 ]
 
 # Coverage table rows. The Diagram column is filled in from the files actually
 # present, so the table can never contradict the diagram viewer.
 # (agent, slug, phase, detailed spec, endpoints, autonomy today)
 COVERAGE = [
+    ('Agent Assist', 'agent-assist-architecture', '1', '—', '✓ consumer',
+     'Suggest'),
+    ('Conversational', 'conversational-agent-architecture', '2', '—', '✓ consumer',
+     'Advisory'),
+    ('RCA', 'rca-agent-architecture', '3', '—', '✓ consumer', 'Draft only'),
     ('Knowledge', 'knowledge-agent-architecture', '1–2', 'yes', 'yes',
      'Advisory / draft-only'),
     ('Predictive', 'predictive-agent-architecture', '2', 'yes', 'yes',
      'Advisory (level 1, all actions)'),
-    ('Agent Assist', 'agent-assist-architecture', '1', '—', '✓ consumer',
-     'Suggest'),
+    ('DC Ops', 'dcops-agent-architecture', '3', '—', '✓ consumer', 'Advisory'),
     ('Voice', 'voice-agent-architecture', '2', '✓ policy', '✓ consumer',
      'Auto-execute, closed set'),
-    ('Conversational', 'conversational-agent-architecture', '2', '—', '✓ consumer',
-     'Advisory'),
-    ('RCA', 'rca-agent-architecture', '3', '—', '✓ consumer', 'Draft only'),
-    ('DC Ops', 'dcops-agent-architecture', '3', '—', '✓ consumer', 'Advisory'),
 ]
 
 EXTS = ('.png', '.svg', '.jpg', '.jpeg')
@@ -111,7 +113,7 @@ def main():
         pid = f'd{i}'
         on = ' on' if i == default else ''
         bul = 'bul' if path else 'bul pend'
-        tabs.append(f'<button class="tab{on}" data-p="{pid}">'
+        tabs.append(f'<button class="tab{on}" data-go="{i}">'
                     f'<span class="{bul}"></span>{label}</button>')
 
         if path:
@@ -130,8 +132,8 @@ def main():
             print(f'  [ ] {label:24s} -- no file, placeholder rendered')
 
         panes.append(
-            f'<div class="dpane{on}" id="{pid}"><div class="viewer">'
-            f'<div class="vbar"><span class="t">{caption}</span>{controls}</div>'
+            f'<div class="cslide{on}" id="{pid}" data-i="{i}"><div class="viewer">'
+            f'<div class="vbar"><span class="t"><b>{label}</b> — {caption}</span>{controls}</div>'
             f'{body}</div></div>')
 
     # coverage table — Diagram column derived from the files on disk
@@ -150,8 +152,13 @@ def main():
                     f'{cell(has)}<td>{autonomy}</td></tr>')
 
     html = open(os.path.join(ROOT, 'site', 'template.html'), encoding='utf-8').read()
+    dots = ''.join(f'<button class="cdot{" on" if i == default else ""}" data-go="{i}" '
+                   f'aria-label="{lbl}"></button>' for i, (lbl, *_) in enumerate(resolved))
+
     html = html.replace('__DIAGRAM_TABS__', '\n      '.join(tabs))
     html = html.replace('__DIAGRAM_PANES__', '\n    '.join(panes))
+    html = html.replace('__DIAGRAM_DOTS__', dots)
+    html = html.replace('__DIAGRAM_START__', str(default))
     html = html.replace('__COVERAGE_ROWS__', '\n      '.join(rows))
     html = html.replace('__DIAGRAM_COUNT__', f'{found} of {len(DIAGRAMS)}')
     assert '__DIAGRAM' not in html and '__COVERAGE' not in html, 'unreplaced placeholder'
