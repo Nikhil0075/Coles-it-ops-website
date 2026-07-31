@@ -5,13 +5,61 @@ Companion document to the two Whimsical architecture diagrams.
 
 | Diagram | Link |
 |---|---|
+| **AgentOps — Combined System (all seven agents)** | **https://whimsical.com/XoDwbzi5VnQADZJu1uJJgR** |
 | Knowledge Agent — Azure Architecture | https://whimsical.com/5xQdL3XX7LyV6TKudTQmNU |
 | Predictive Agent — Azure Architecture | https://whimsical.com/2AKCBwFyHWwoabyS3ZM8gt |
 | RCA Agent — Azure Architecture | https://whimsical.com/2bdQLKnukbUnYewenpPpeu |
 | Conversational Agent — Azure Architecture | https://whimsical.com/ASWBxR1juQ97d5yb4ChjfU |
 | Voice Agent — Azure Architecture | https://whimsical.com/JnUN8EQGZFeSARRSh1MxpM |
+| Agent Assist — Azure Architecture | https://whimsical.com/LZqnydRsDVgVoJtqCq9DtW |
+| DC Ops Agent — Azure Architecture | https://whimsical.com/5sKvZXcMFvmKiczmVDvhfG |
 
 The diagrams are deliberately sparse — only the services that carry the design, with labeled directional flows and the trust boundaries that matter. Numbered arrows correspond to the numbered flow steps below; this document carries the full detail that is intentionally kept off the canvas.
+
+---
+
+## 0. The combined system — what makes seven agents one product
+
+### How work moves between the agents
+
+The seven are not peers doing the same job — they sit in tiers.
+
+**Front line (Conversational + Voice).** Same capability, different channel: chat/portal versus PSTN/Teams. Both intake an issue, answer what they can from grounded knowledge, and raise a ticket when they can't. Neither escalates to a specialist directly — they hand to Agent Assist.
+
+**Triage (Agent Assist).** The L1 co-pilot. Gathers service-catalog context, runbooks and similar incidents, ranks remediations, then routes on incident type:
+
+- Network or database infrastructure → **DC Ops Agent**
+- Application or backend code defect → **RCA Agent**
+- Store hardware or identity request → stays in Agent Assist
+
+**Specialists (RCA + DC Ops).** RCA does post-incident analysis and publishes an approved RCA back to the Knowledge Agent, so the fleet gets smarter. DC Ops inspects network and SQL telemetry and holds the fleet's only write authority.
+
+**Cross-cutting (Knowledge + Predictive).** Knowledge grounds every agent above it — nobody else owns an index. Predictive reads the whole ticket estate rather than any single incident, and pushes risk context (recurrence, forecasts, weekly watchlist) to Agent Assist and DC Ops.
+
+That tiering is why the fleet band in the diagram is a topology rather than a row: the escalation arrows are the product.
+
+### The five shared things
+
+Everything else is per-agent.
+
+1. **One ingress rail.** Every request from every channel goes Front Door + WAF → APIM AI Gateway → de-identification tier. No agent has a private front door, so token limits, content safety, throttling and audit are enforced once rather than seven times.
+2. **One contract.** Entra Agent ID token, `x-correlation-id`, APIM subscription key, pseudonymised payload. Adding an eighth agent means implementing this contract, not negotiating a new integration.
+3. **One grounding hub.** The Knowledge Agent owns the index; the other six call `POST /query`. This is the single most important structural decision in the design — it means knowledge quality is fixed in one place, and an approved RCA improves every agent at once.
+4. **One data, action and event plane.** Shared Cosmos, OneLake, Service Bus and Functions tool proxies. Agents emit intent; proxies act (P1).
+5. **One control plane.** Identity, secrets, DLP, private networking, telemetry and evaluation are fleet-wide. One correlation ID spans channel → APIM → agent → tool → system of record.
+
+### Findings from the AgentOps repository
+
+The `AgentOps-agentops-integration` implementation confirms the hub pattern and surfaces three gaps against this target architecture.
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | **The Knowledge Agent hub is real.** Conversational, Agent Assist and RCA all resolve `KNOWLEDGE_AGENT_URL` and call `/query` on port 8004. | `conversational_agent.py:47`, `agent_assist_agent.py:111`, `rca_agent.py:98` |
+| 2 | **Predictive points at the wrong agent.** Its `KNOWLEDGE_AGENT_URL` defaults to `http://127.0.0.1:8001` — that is the **RCA Agent**. The Knowledge Agent is 8004. Same defect in the seed script. Predictive's Knowledge Cross-Referencer is calling RCA. | `predictive_agent/tools/tools.py:12`, `data/seed_knowledge_base.py:51` |
+| 3 | **Agent Assist has no escalation tool.** `escalate_to_specialist_agent_tool` appears in the design graph but no such tool or outbound call to DC Ops (8006) / RCA (8001) exists in `agent_assist_agent.py`. Routing is currently classification only. | grep of `agent-agent_assist/` |
+| 4 | **No shared ingress today.** Each backend binds `0.0.0.0` on its own port (8000–8006) with permissive CORS; the React frontend on 5173 is the only integrator. There is no APIM, no de-identification tier and no shared identity in the running system. | `README.md`, `frontend/src/hooks/*` |
+
+Finding 4 is expected for a local dev fleet and is exactly the gap the target architecture closes. Findings 2 and 3 are defects worth fixing regardless of deployment model — 2 in particular will produce confusing behaviour rather than a clean failure, because port 8001 *does* answer.
 
 ---
 
@@ -228,6 +276,46 @@ That trade is real and worth stating plainly: this design accepts worse turn-tak
 *The regex layer is doing more work than it looks.* On a voice channel the PII Guard sees ASR output, not typed text — transcription errors will defeat pure ML PII detection on exactly the high-risk tokens (card numbers, employee IDs, addresses) because those are read aloud digit by digit. Keeping the deterministic regex layer alongside AI Language is the right call; consider also constraining the ASR with phrase lists for known identifier formats.
 
 *Confirmation before action is not optional on voice.* There is no screen to review a draft. Any `auto_execute` action should be read back and verbally confirmed before the tool proxy fires, and that confirmation belongs in the run record alongside the correlation ID.
+
+---
+
+## 6d. Agent Assist — flow and design notes
+
+The L1 co-pilot beside the ticket. It resolves what it can with grounded guidance and routes the rest, producing both a human-readable brief and structured context for whichever specialist agent picks it up.
+
+**Flow.** Parse incident context → service catalog lookup (owner + dependencies) → runbook retrieval via the Knowledge Agent → similar historical incidents from Fabric OneLake → ranked remediation options → **groundedness critic** → deterministic categorisation → route to DC Ops, RCA, or handle locally → `generate_assist_response_tool` → `assist_guidance.md` + `agent_context_out.json` → handover summary and draft closure notes.
+
+**Three notes on the supplied graph**
+
+*The evidence lookups are serialised but independent.* Service catalog, runbook retrieval and similar-incident search have no data dependency on each other — all three only need the parsed context. Chained sequentially they add three round trips to a latency budget an engineer is watching in real time, mid-incident. Fan them out in parallel and join before remediation. This is the single highest-value change to the graph.
+
+*There is no groundedness gate.* The output promises "remediations + runbooks + **confidence**", but nothing in the graph blocks a remediation that no runbook supports. Every other agent in the fleet has a paired critic (P3); Agent Assist needs one more than most, because its output is read by an L1 engineer under time pressure who is least equipped to catch a plausible-sounding but unsupported instruction. Added to the diagram between remediation and routing.
+
+*Categorisation should not be an LLM call.* Routing to DC Ops versus RCA is decidable from the service catalog and CI class — data already fetched two steps earlier. Deterministic routing is reproducible, auditable and free; an LLM classifier here adds cost and a failure mode for no benefit.
+
+The metric to instrument is **remediation acceptance rate** — how often the engineer actually follows the top-ranked suggestion. That is the honest measure of whether this agent helps.
+
+---
+
+## 6e. DC Ops Agent — flow and design notes
+
+**This is the only agent in the fleet with write authority to a production system.** `apply_force_last_good_plan` executes a query-plan rollback against Azure SQL without a human in the loop. Everything else in the blueprint is advisory or draft-only. That asymmetry deserves to be the loudest thing in the diagram, and it is.
+
+**Flow.** Network Watcher alerts → SQL tuning recommendations → plan-rollback decision → **change-window and approval guard** → apply → **post-apply verification** → runbook grounding per alert category (loops) → root-cause synthesis → `generate_dcops_response_tool` → `agent_context_out` → completion check → deterministic fallback if synthesis failed → human publish gate → Knowledge Base.
+
+**What the graph gets right**
+
+The **deterministic fallback** is genuinely good design and rare to see specified. When final synthesis fails the agent still returns everything it gathered, flagged `COMPLETED_FALLBACK`, instead of erroring out. An on-call engineer at 3am gets partial diagnostics rather than a stack trace. Keep it, and make sure the status distinction is visible in the UI so nobody mistakes fallback output for full analysis.
+
+The **human publish gate** before writing to the KB is also correct — it prevents an unreviewed diagnostic guess from becoming grounding data for every other agent.
+
+**Two gaps, both added to the diagram**
+
+*No post-apply verification.* The graph applies the plan rollback and moves straight to collecting alert categories. It never confirms the change had the intended effect. A write action without a verification step and a rollback path is not a safe automation — it is an unattended one. Verify, and roll back automatically if the metric that triggered the action has not recovered.
+
+*No change-window or approval guard.* "Pre-approved" describes the *action type*, not the *moment*. Applying a query-plan rollback to a production database during peak trade is a materially different risk from applying it at 2am on a Tuesday, even when the action itself is on the approved list. The guard should check change freeze status and blast radius before the apply fires.
+
+**Governance implication.** Because this agent holds a write role, its Entra scope, its change records and its rollback history are the highest-value audit surface in the whole fleet. Every apply should emit an immutable change record to ADLS Gen2 carrying the same correlation ID as the triggering alert — shown on the diagram as a dashed line from the apply step.
 
 ---
 

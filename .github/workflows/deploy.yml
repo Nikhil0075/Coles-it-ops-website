@@ -46,13 +46,17 @@ jobs:
         # someone remembers to run the build locally.
         run: python3 site/build_site.py
 
-      - name: Stage only the site file
+      - name: Stage the site
         run: |
-          mkdir -p _site
+          mkdir -p _site/architecture
           cp index.html _site/index.html
+          # diagram images only — no specs, .docx or mock data get published
+          cp architecture/*.png _site/architecture/ 2>/dev/null || true
+          cp architecture/*.svg _site/architecture/ 2>/dev/null || true
           # stops Pages running the output through Jekyll
           touch _site/.nojekyll
-          echo "Staged $(du -h _site/index.html | cut -f1) of site"
+          echo "index.html   $(du -h _site/index.html | cut -f1)"
+          echo "diagrams     $(du -sh _site/architecture | cut -f1)"
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

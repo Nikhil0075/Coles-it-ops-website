@@ -46,21 +46,29 @@ DIAGRAMS = [
 # present, so the table can never contradict the diagram viewer.
 # (agent, slug, phase, detailed spec, endpoints, autonomy today)
 COVERAGE = [
-    ('Agent Assist', 'agent-assist-architecture', '1', '—', '✓ consumer',
-     'Suggest'),
-    ('Conversational', 'conversational-agent-architecture', '2', '—', '✓ consumer',
-     'Advisory'),
-    ('RCA', 'rca-agent-architecture', '3', '—', '✓ consumer', 'Draft only'),
-    ('Knowledge', 'knowledge-agent-architecture', '1–2', 'yes', 'yes',
-     'Advisory / draft-only'),
-    ('Predictive', 'predictive-agent-architecture', '2', 'yes', 'yes',
-     'Advisory (level 1, all actions)'),
-    ('DC Ops', 'dcops-agent-architecture', '3', '—', '✓ consumer', 'Advisory'),
-    ('Voice', 'voice-agent-architecture', '2', '✓ policy', '✓ consumer',
+    ('Agent Assist', 'agent-assist-architecture', 'Triage', '1', 'yes', '✓ consumer',
+     'Suggest only'),
+    ('Conversational', 'conversational-agent-architecture', 'Front line', '2', 'yes',
+     '✓ consumer', 'Advisory'),
+    ('RCA', 'rca-agent-architecture', 'Specialist', '3', 'yes', '✓ consumer',
+     'Draft only'),
+    ('Knowledge', 'knowledge-agent-architecture', 'Cross-cutting', '1–2', 'yes',
+     '✓ provider', 'Advisory / draft-only'),
+    ('Predictive', 'predictive-agent-architecture', 'Cross-cutting', '2', 'yes',
+     '✓ provider', 'Advisory only'),
+    ('DC Ops', 'dcops-agent-architecture', 'Specialist', '3', 'yes', '✓ consumer',
+     '<b>Write authority</b>, guarded'),
+    ('Voice', 'voice-agent-architecture', 'Front line', '2', 'yes', '✓ consumer',
      'Auto-execute, closed set'),
 ]
 
 EXTS = ('.png', '.svg', '.jpg', '.jpeg')
+
+# Embed the diagrams as base64 (one self-contained file you can email, but the
+# whole payload loads up front) or link them (far faster first paint, lazy-loaded,
+# but index.html then needs the architecture/ folder beside it).
+# With 8 diagrams embedding puts index.html around 8 MB, so linking is the default.
+EMBED_IMAGES = False
 
 
 def find(slug):
@@ -72,8 +80,13 @@ def find(slug):
     return None, None
 
 
-def graphic(path, ext):
-    """Return inline HTML for the diagram, embedded so index.html stays self-contained."""
+def graphic(path, ext, eager=False):
+    """Return the HTML for one diagram — linked by default, embedded if EMBED_IMAGES."""
+    if not EMBED_IMAGES and ext != '.svg':
+        rel = 'architecture/' + os.path.basename(path)
+        # the first diagram loads eagerly so the section is never briefly blank
+        lazy = '' if eager else ' loading="lazy" decoding="async"'
+        return f'<img alt="architecture diagram"{lazy} src="{rel}">'
     if ext == '.svg':
         svg = open(path, encoding='utf-8').read()
         svg = re.sub(r'<\?xml[^>]*\?>', '', svg)
@@ -118,7 +131,8 @@ def main():
 
         if path:
             found += 1
-            body = f'<div class="stage"><div class="zoomer">{graphic(path, ext)}</div></div>'
+            body = ('<div class="stage"><div class="zoomer">'
+                    f'{graphic(path, ext, eager=(i == default))}</div></div>')
             controls = ('<span class="sp">'
                         '<button class="vb" data-z="-" title="Zoom out">−</button>'
                         '<button class="vb w" data-z="fit">Fit</button>'
@@ -146,10 +160,10 @@ def main():
         return f'<td{cls}>{v}</td>'
 
     rows = []
-    for agent, slug, phase, spec, eps, autonomy in COVERAGE:
+    for agent, slug, tier, phase, spec, eps, autonomy in COVERAGE:
         has = 'yes' if find(slug)[0] else 'no'
-        rows.append(f'<tr><td>{agent}</td><td>{phase}</td>{cell(spec)}{cell(eps)}'
-                    f'{cell(has)}<td>{autonomy}</td></tr>')
+        rows.append(f'<tr><td>{agent}</td><td>{tier}</td><td>{phase}</td>{cell(spec)}'
+                    f'{cell(eps)}{cell(has)}<td>{autonomy}</td></tr>')
 
     html = open(os.path.join(ROOT, 'site', 'template.html'), encoding='utf-8').read()
     dots = ''.join(f'<button class="cdot{" on" if i == default else ""}" data-go="{i}" '

@@ -71,12 +71,11 @@ Plus, at the folder root:
 
 `build_site.py` holds a `DIAGRAMS` list of 8 slots — combined overview + one per agent. For each it looks in `architecture/` for `<slug>.png`, `.svg`, `.jpg`. If found it base64-embeds it and the tab shows a green dot; if not it renders a "slot reserved" placeholder with a grey dot. The section opens on the first tab that actually has a diagram.
 
-Present: `knowledge-agent-architecture.png`, `predictive-agent-architecture.png` (uploaded July 2026; flattened onto white and resized to 2400px wide by the build prep — originals were 3412px RGBA with a transparent surround).
+**All 8 diagram slots are filled** (July 2026). Every PNG is flattened onto white and resized to 2400px wide — Whimsical exports at ~3400px RGBA with a transparent surround, which renders dark against the page and bloats the payload. Always run that prep on a new export.
 
-Pending slugs: `knowledge-predictive-architecture` (combined overview), `agent-assist-architecture`, `voice-agent-architecture`, `conversational-agent-architecture`, `rca-agent-architecture`, `dcops-agent-architecture`.
-Export from Whimsical, name it with the slug, drop it in `architecture/`, re-run the build — no template edit needed.
+**Images are linked, not embedded.** `EMBED_IMAGES = False` in `build_site.py`. With 8 diagrams, base64 pushed `index.html` to 8 MB; linking drops it to ~72 KB with the diagrams lazy-loaded (the first is eager so the section is never blank). The deploy workflow copies `index.html` plus `architecture/*.png|svg` into `_site`. Flip `EMBED_IMAGES = True` for a single self-contained file to email — nothing else changes.
 
-`index.html` is ~2.1 MB because the PNGs are embedded. That's expected; it keeps the file self-contained.
+Text content for all 7 agents comes from `architecture/azure-architecture-knowledge-and-predictive-agents.md` (§0 fleet tiering, §5–6e per-agent flows). **DC Ops holds the fleet's only production write authority** — this is stated in P1, the agent card and the coverage table; don't regress it to "advisory".
 
 Text content for all 7 agents is already on the page. Knowledge and Predictive are detailed; Voice is grounded in `SOP-VOICE-IDENTITY-ACCESS-POLICY-002` and the mock tickets; Agent Assist, Conversational, RCA and DC Ops are written at capability level from the spec's §4 caller table (role, how it calls, autonomy, endpoints consumed).
 
